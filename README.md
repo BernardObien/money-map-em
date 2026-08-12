@@ -4,6 +4,14 @@ An open extension of the [MIT DCI Money Map](https://mit-dci.github.io/payments-
 
 **Live prototype:** https://bernardobien.github.io/money-map-em/
 
+## v0.2 changelog
+
+Revised after a round of feedback from an early external reviewer. Changes:
+
+- **Methodology corrections.** Card on-ramp fees are now differentiated by asset (USDC ~2.44% vs USDT ~4.19%, per Coinbase's published schedule) rather than treated as uniform. NGN bank off-ramp is modeled at retail rates (~0.1–0.5%), correcting an earlier assumption that was an order of magnitude too high and made stablecoin rails look worse than they are.
+- **Per-method fee breakdown.** Every stablecoin route now decomposes its total into on-ramp / network fee / off-ramp / FX spread — click any row to expand it. FX spread is always applied as a cost, and a guard ensures a recipient can never receive more than the amount sent.
+- **UX simplification.** Cut to a two-colour palette (neutral ink + a single blue accent), replaced the green "best" highlight with a ★ marker, collapsed the methodology note into an expandable section, added a "How to read this" opener and a legend, and turned the corridor tabs into single-line pills. Renamed the "Not on Money Map" tag to "Missing from DCI".
+
 ## Why this exists
 
 The DCI Money Map is genuinely useful, but at the time of writing (August 2026) it has three structural gaps for emerging-market analysis:

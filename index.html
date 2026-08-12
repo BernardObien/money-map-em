@@ -61,11 +61,36 @@
   .attrib a:hover { text-decoration: underline; }
 
   .callout {
-    background: var(--warn-bg); border: 0.5px solid var(--warn-border);
-    color: var(--warn); padding: 10px 14px; border-radius: 8px;
+    background: var(--card); border: 0.5px solid var(--line);
+    color: var(--ink-2); padding: 0; border-radius: 8px;
     font-size: 12px; margin-bottom: 20px; line-height: 1.6;
   }
+  .callout summary {
+    cursor: pointer; padding: 10px 14px; font-weight: 500; color: var(--ink);
+    list-style: none;
+  }
+  .callout summary::-webkit-details-marker { display: none; }
+  .callout summary::before { content: '▸  '; color: var(--ink-3); }
+  .callout[open] summary::before { content: '▾  '; }
+  .callout .callout-body { padding: 0 14px 12px; }
   .callout strong { font-weight: 500; }
+
+  .how-to-read {
+    font-size: 13px; color: var(--ink-2); margin: 0 0 20px;
+    padding: 12px 16px; background: var(--card);
+    border: 0.5px solid var(--line); border-radius: 8px; line-height: 1.6;
+  }
+  .how-to-read strong { color: var(--ink); font-weight: 500; }
+
+  .legend {
+    display: flex; gap: 18px; flex-wrap: wrap;
+    font-size: 11px; color: var(--ink-3); margin-bottom: 12px;
+    padding: 8px 12px; background: var(--card);
+    border: 0.5px solid var(--line); border-radius: 6px;
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+  .legend-star { color: var(--ink); font-size: 12px; }
+  .legend-bar { width: 3px; height: 12px; background: var(--accent); border-radius: 1px; display: inline-block; }
 
   nav.corridors {
     display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px;
@@ -73,19 +98,18 @@
   }
   .corridor-tab {
     flex-shrink: 0;
-    padding: 8px 14px; border-radius: 6px; cursor: pointer;
+    padding: 7px 14px; border-radius: 999px; cursor: pointer;
     font-size: 13px; color: var(--ink-2);
-    border: 0.5px solid transparent;
-    display: flex; flex-direction: column; gap: 2px; min-width: 130px;
+    border: 0.5px solid var(--line-2); background: var(--card);
+    display: flex; align-items: center; gap: 8px; white-space: nowrap;
   }
-  .corridor-tab:hover { background: var(--card); border-color: var(--line); }
+  .corridor-tab:hover { border-color: var(--ink-3); }
   .corridor-tab.active {
-    background: var(--card); border-color: var(--line-2);
-    color: var(--ink); font-weight: 500;
+    background: var(--ink); border-color: var(--ink);
+    color: #fff; font-weight: 500;
   }
   .corridor-flag { font-size: 14px; }
   .corridor-name { font-size: 13px; }
-  .corridor-vol { font-size: 10px; color: var(--ink-3); font-weight: 400; }
 
   .amount-row {
     display: flex; gap: 12px; align-items: center; margin-bottom: 20px;
@@ -156,10 +180,11 @@
     gap: 12px; padding: 10px 14px; margin-bottom: 4px;
     background: var(--card); border: 0.5px solid var(--line);
     border-radius: 6px; align-items: center; font-size: 13px;
+    cursor: pointer;
   }
+  .method:hover { border-color: var(--line-2); }
   .method.best {
-    border-color: var(--success-border);
-    background: var(--success-bg);
+    border-color: var(--ink-2);
   }
   .method.gap {
     border-left: 3px solid var(--accent);
@@ -174,7 +199,7 @@
   .method-time { font-size: 12px; color: var(--ink-2); text-align: right; }
   .method-fee { font-size: 13px; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
   .method-pct { font-size: 12px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
-  .method-recipient { font-size: 12px; color: var(--success); text-align: right; font-variant-numeric: tabular-nums; }
+  .method-recipient { font-size: 12px; color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
 
   .tag {
     font-size: 9px; padding: 2px 6px; border-radius: 3px;
@@ -182,16 +207,27 @@
     white-space: nowrap;
   }
   .tag-gap { background: var(--accent-bg); color: var(--accent); }
-  .tag-best { background: var(--success-bg); color: var(--success); }
+  .tag-best { background: var(--ink); color: #fff; }
   .method-note {
-    font-size: 11px; color: var(--warn); background: var(--warn-bg);
+    font-size: 11px; color: var(--ink-2); background: var(--bg);
     padding: 6px 10px; margin-top: 4px; border-radius: 4px;
-    grid-column: 1 / -1;
+    grid-column: 1 / -1; border: 0.5px solid var(--line);
   }
 
+  .method-expand { color: var(--accent); font-size: 10px; white-space: nowrap; }
+  .method-breakdown {
+    grid-column: 1 / -1; margin-top: 6px; padding: 8px 12px;
+    background: var(--bg); border: 0.5px solid var(--line); border-radius: 4px;
+  }
+  .bd-row { display: flex; justify-content: space-between; font-size: 11px; padding: 2px 0; color: var(--ink-2); }
+  .bd-label { color: var(--ink-3); }
+  .bd-val { font-variant-numeric: tabular-nums; }
+  .bd-note { font-size: 11px; color: var(--ink-2); margin-top: 6px; padding-top: 6px; border-top: 0.5px solid var(--line); line-height: 1.5; }
+
   .corridor-context {
-    background: var(--accent-bg); border: 0.5px solid var(--accent-border);
-    color: var(--accent); padding: 10px 14px; border-radius: 8px;
+    background: var(--card); border: 0.5px solid var(--line);
+    border-left: 3px solid var(--accent);
+    color: var(--ink-2); padding: 10px 14px; border-radius: 8px;
     font-size: 12px; margin-bottom: 20px; line-height: 1.6;
   }
 
@@ -222,7 +258,7 @@
     <div class="brand">
       <span class="brand-dot"></span>
       <span class="brand-title">Money Map · EM Extension</span>
-      <span class="brand-sub">v0.1 · prototype</span>
+      <span class="brand-sub">v0.2 · prototype</span>
     </div>
     <h1>Corridor rate transparency for emerging markets</h1>
     <p class="lede">An open extension of the <a href="https://mit-dci.github.io/payments-dashboard/" style="color: var(--accent);">MIT DCI Money Map</a> for corridors, methods, and rails where operator-side ground truth changes the picture — mobile-money receive, EM-native remittance providers, stablecoin off-ramps, and P2P channels.</p>
@@ -234,9 +270,12 @@
     </div>
   </header>
 
-  <div class="callout">
-    <strong>Prototype note.</strong> The current DCI Money Map covers 10 US-originating corridors and shows Nigeria's best fee as 0.00% (data unavailability rendered as zero). This extension adds four corridors, ten+ methods per corridor including mobile-money and P2P rails, and explicit parallel-market FX benchmarking. Rates reflect published fee schedules and typical off-ramp spreads observed in live corridors — see the <a href="#methodology" style="color: var(--warn);">methodology note</a>.
-  </div>
+  <p class="how-to-read"><strong>How to read this.</strong> Pick a corridor, set the amount, and compare methods by fee, speed, and what the recipient actually receives. Rows tagged <strong>“Missing from DCI”</strong> are the coverage gaps this extension surfaces. Click any row to expand its on-ramp / network / off-ramp / FX-spread breakdown.</p>
+
+  <details class="callout">
+    <summary>Methodology &amp; caveats</summary>
+    <div class="callout-body"><strong>Prototype note.</strong> The current DCI Money Map covers 10 US-originating corridors and shows Nigeria's best fee as 0.00% (data unavailability rendered as zero). This extension adds four corridors, ten+ methods per corridor including mobile-money and P2P rails, and explicit parallel-market FX benchmarking. Rates reflect published fee schedules and typical off-ramp spreads observed in live corridors; NGN bank off-ramp is modeled at retail (~0.1–0.5%), not 2%, and every recipient value is capped below the amount sent. Card on-ramp is differentiated by asset (USDC ~2.44% vs USDT ~4.19%, Coinbase schedule). Network fees are flat, so at larger transfer sizes the effective stablecoin cost falls below the headline percentage. Not live quotes.</div>
+  </details>
 
   <nav class="corridors" id="corridor-tabs"></nav>
 
@@ -252,6 +291,12 @@
   <div class="metrics" id="metrics"></div>
 
   <div class="filters" id="filters"></div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-star">★</span> Best rate in current view</span>
+    <span class="legend-item"><span class="legend-bar"></span> Missing from DCI Money Map</span>
+    <span class="legend-item">Click any row for its fee breakdown</span>
+  </div>
 
   <div id="methods-list"></div>
 

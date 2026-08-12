@@ -1,9 +1,9 @@
 {
   "meta": {
-    "version": "0.1.0",
+    "version": "0.2.0",
     "last_updated": "2026-08-12",
     "fx_source": "Parallel-market rates from Aboki FX (NGN), BCRA blue-dollar (ARS), Central Bank of Kenya (KES), Bank of Ghana (GHS)",
-    "notes": "Illustrative August 2026 rates. Numbers reflect published fee schedules and typical off-ramp spreads observed in live corridors. For production use, integrate with provider APIs (see roadmap in README).",
+    "notes": "Illustrative August 2026 rates. Numbers reflect published fee schedules and typical off-ramp spreads observed in live corridors. For production use, integrate with provider APIs (see roadmap in README). v0.2: per-method fee_breakdown added for stablecoin routes (on-ramp / network / off-ramp / FX spread); card on-ramp differentiated USDC ~2.44% vs USDT ~4.19% per Coinbase schedule; NGN bank off-ramp modeled at retail (~0.1-0.5%), not 2%; recipient value can never exceed amount sent.",
     "maintainer": "Bernard O'bien / Cambio",
     "contact": "obien@mit.edu"
   },
@@ -36,9 +36,9 @@
         { "category": "remittance", "provider": "NALA", "product": "Debit → Mobile wallet", "route": "Debit → OPay / PalmPay wallet", "time": "Minutes", "fee_usd": 4.00, "fee_pct": 2.00, "on_money_map": false },
         { "category": "remittance", "provider": "Grey", "product": "ACH → Bank", "route": "ACH → Bank deposit", "time": "Same day", "fee_usd": 4.50, "fee_pct": 2.25, "on_money_map": false },
         { "category": "remittance", "provider": "ChipperCash", "product": "Debit → Wallet", "route": "Debit → ChipperCash NGN wallet", "time": "Minutes", "fee_usd": 5.50, "fee_pct": 2.75, "on_money_map": false },
-        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Cash App → Binance P2P", "route": "USDT → NGN via P2P off-ramp", "time": "15–30 min", "fee_usd": 1.50, "fee_pct": 0.75, "on_money_map": false },
-        { "category": "stablecoin", "provider": "USDC on Base", "product": "Coinbase → Yellow Card", "route": "USDC → NGN via Yellow Card", "time": "20–40 min", "fee_usd": 3.00, "fee_pct": 1.50, "on_money_map": false },
-        { "category": "stablecoin", "provider": "USDT on Ethereum", "product": "Kraken → local exchange", "route": "USDT → NGN via Nigerian exchange", "time": "1–2 hours", "fee_usd": 12.00, "fee_pct": 6.00, "on_money_map": true },
+        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Cash App → Binance P2P", "route": "USDT → NGN via P2P off-ramp", "time": "15–30 min", "fee_usd": 1.50, "fee_pct": 0.75, "on_money_map": false, "fee_breakdown": { "onramp_pct": 0.25, "network_fee_usd": 0.20, "offramp_pct": 0.35, "fx_spread_pct": 0.05 }, "onramp_note": "Funded from Cash App balance. A debit-card on-ramp would add ~4.19% for USDT vs ~2.44% for USDC (Coinbase card schedule)." },
+        { "category": "stablecoin", "provider": "USDC on Base", "product": "Coinbase → Yellow Card", "route": "USDC → NGN via Yellow Card", "time": "20–40 min", "fee_usd": 3.00, "fee_pct": 1.50, "on_money_map": false, "fee_breakdown": { "onramp_pct": 0.55, "network_fee_usd": 0.10, "offramp_pct": 0.70, "fx_spread_pct": 0.20 }, "onramp_note": "Coinbase USDC on-ramp ~2.44% by card vs ~4.19% for USDT; Base network fee is negligible." },
+        { "category": "stablecoin", "provider": "USDT on Ethereum", "product": "Kraken → local exchange", "route": "USDT → NGN via Nigerian exchange", "time": "1–2 hours", "fee_usd": 12.00, "fee_pct": 6.00, "on_money_map": true, "fee_breakdown": { "onramp_pct": 1.50, "network_fee_usd": 8.00, "offramp_pct": 0.50, "fx_spread_pct": 0.00 }, "onramp_note": "Ethereum L1 gas dominates the cost — identical USDT on Tron or Base is far cheaper." },
         { "category": "p2p", "provider": "Binance P2P", "product": "Bank → USDT → NGN", "route": "Bank → USDT purchase → P2P sell to NGN", "time": "15–45 min", "fee_usd": 2.00, "fee_pct": 1.00, "on_money_map": false },
         { "category": "p2p", "provider": "Noones", "product": "ACH → USDT → NGN cash", "route": "ACH → USDT → P2P cash pickup", "time": "30–60 min", "fee_usd": 3.00, "fee_pct": 1.50, "on_money_map": false }
       ]
@@ -61,8 +61,8 @@
         { "category": "remittance", "provider": "WorldRemit", "product": "Debit → M-Pesa", "route": "Debit → M-Pesa wallet", "time": "Minutes", "fee_usd": 3.99, "fee_pct": 2.00, "on_money_map": false },
         { "category": "remittance", "provider": "Sendwave", "product": "Debit → M-Pesa", "route": "Debit → M-Pesa wallet", "time": "Minutes", "fee_usd": 5.00, "fee_pct": 2.50, "on_money_map": false, "note": "No upfront fee; effective cost is ~2.5% FX spread, shown here so it is not misread as free" },
         { "category": "remittance", "provider": "Wise", "product": "ACH → M-Pesa", "route": "ACH → M-Pesa wallet", "time": "Hours", "fee_usd": 4.50, "fee_pct": 2.25, "on_money_map": false },
-        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Coinbase → local exchange", "route": "USDT → KES via BitPesa/Kotani", "time": "20–40 min", "fee_usd": 2.50, "fee_pct": 1.25, "on_money_map": false },
-        { "category": "stablecoin", "provider": "USDC on Base", "product": "Yellow Card KE", "route": "USDC → KES → M-Pesa", "time": "20–40 min", "fee_usd": 3.50, "fee_pct": 1.75, "on_money_map": false },
+        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Coinbase → local exchange", "route": "USDT → KES via BitPesa/Kotani", "time": "20–40 min", "fee_usd": 2.50, "fee_pct": 1.25, "on_money_map": false, "fee_breakdown": { "onramp_pct": 0.40, "network_fee_usd": 0.20, "offramp_pct": 0.55, "fx_spread_pct": 0.20 }, "onramp_note": "Coinbase USDT on-ramp; card purchase would add ~4.19% vs ~2.44% for USDC." },
+        { "category": "stablecoin", "provider": "USDC on Base", "product": "Yellow Card KE", "route": "USDC → KES → M-Pesa", "time": "20–40 min", "fee_usd": 3.50, "fee_pct": 1.75, "on_money_map": false, "fee_breakdown": { "onramp_pct": 0.60, "network_fee_usd": 0.10, "offramp_pct": 0.85, "fx_spread_pct": 0.25 }, "onramp_note": "USDC card on-ramp ~2.44% vs ~4.19% for USDT; off-ramp settles direct to M-Pesa." },
         { "category": "p2p", "provider": "Binance P2P", "product": "Bank → USDT → KES", "route": "USDT → KES → M-Pesa", "time": "20–45 min", "fee_usd": 2.00, "fee_pct": 1.00, "on_money_map": false }
       ]
     },
@@ -83,8 +83,8 @@
         { "category": "remittance", "provider": "Sendwave", "product": "Debit → Bank", "route": "Debit → NGN Bank", "time": "Minutes", "fee_usd": 4.00, "fee_pct": 2.00, "on_money_map": false },
         { "category": "remittance", "provider": "Wise", "product": "Bank → Bank", "route": "Faster Payments → NGN Bank", "time": "Hours", "fee_usd": 6.50, "fee_pct": 3.25, "on_money_map": false },
         { "category": "remittance", "provider": "Grey", "product": "Bank → Bank", "route": "Faster Payments → NGN Bank", "time": "Same day", "fee_usd": 4.00, "fee_pct": 2.00, "on_money_map": false },
-        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Revolut → P2P", "route": "GBP → USDT → NGN P2P", "time": "20–40 min", "fee_usd": 1.75, "fee_pct": 0.88, "on_money_map": false },
-        { "category": "stablecoin", "provider": "USDC on Base", "product": "Revolut → Yellow Card", "route": "GBP → USDC → NGN", "time": "30–60 min", "fee_usd": 3.50, "fee_pct": 1.75, "on_money_map": false },
+        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Revolut → P2P", "route": "GBP → USDT → NGN P2P", "time": "20–40 min", "fee_usd": 1.75, "fee_pct": 0.88, "on_money_map": false, "fee_breakdown": { "onramp_pct": 0.35, "network_fee_usd": 0.20, "offramp_pct": 0.38, "fx_spread_pct": 0.05 }, "onramp_note": "Revolut GBP→USDT spread ~0.35%; a card top-up would add materially more (USDT card fees exceed USDC)." },
+        { "category": "stablecoin", "provider": "USDC on Base", "product": "Revolut → Yellow Card", "route": "GBP → USDC → NGN", "time": "30–60 min", "fee_usd": 3.50, "fee_pct": 1.75, "on_money_map": false, "fee_breakdown": { "onramp_pct": 0.65, "network_fee_usd": 0.10, "offramp_pct": 0.75, "fx_spread_pct": 0.30 }, "onramp_note": "USDC on-ramp ~2.44% by card vs ~4.19% for USDT; Base network fee negligible." },
         { "category": "p2p", "provider": "Binance P2P (GBP)", "product": "Bank → USDT → NGN", "route": "GBP → USDT → NGN P2P", "time": "20–45 min", "fee_usd": 2.25, "fee_pct": 1.13, "on_money_map": false }
       ]
     },
@@ -103,8 +103,8 @@
         { "category": "bank", "provider": "Citi", "product": "Global Transfer", "route": "USD → ARS at official rate", "time": "3–5 days", "fee_usd": 35.00, "fee_pct": 17.50, "on_money_map": true, "note": "Settled at official rate; recipient loses ~10.7% vs blue-dollar" },
         { "category": "remittance", "provider": "Western Union", "product": "Debit → Bank", "route": "Debit → ARS at official rate", "time": "Minutes", "fee_usd": 3.25, "fee_pct": 1.63, "on_money_map": true, "note": "Fee low but FX at official rate; effective cost ~12% at parallel benchmark" },
         { "category": "remittance", "provider": "Wise", "product": "ACH → Bank", "route": "ACH → ARS", "time": "Hours", "fee_usd": 5.50, "fee_pct": 2.75, "on_money_map": true },
-        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Coinbase → Lemon Cash / Belo", "route": "USDT → ARS at blue-dollar rate", "time": "15–30 min", "fee_usd": 2.00, "fee_pct": 1.00, "on_money_map": false, "note": "Settles at parallel market rate; effective savings vs bank ~10%" },
-        { "category": "stablecoin", "provider": "USDC on Base", "product": "Bitso Argentina", "route": "USDC → ARS", "time": "20–40 min", "fee_usd": 3.00, "fee_pct": 1.50, "on_money_map": false },
+        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Coinbase → Lemon Cash / Belo", "route": "USDT → ARS at blue-dollar rate", "time": "15–30 min", "fee_usd": 2.00, "fee_pct": 1.00, "on_money_map": false, "fee_breakdown": { "onramp_pct": 0.35, "network_fee_usd": 0.20, "offramp_pct": 0.45, "fx_spread_pct": 0.10 }, "onramp_note": "Coinbase USDT on-ramp; card adds ~4.19% vs ~2.44% for USDC.", "note": "Settles at parallel market rate; effective savings vs bank ~10%" },
+        { "category": "stablecoin", "provider": "USDC on Base", "product": "Bitso Argentina", "route": "USDC → ARS", "time": "20–40 min", "fee_usd": 3.00, "fee_pct": 1.50, "on_money_map": false, "fee_breakdown": { "onramp_pct": 0.55, "network_fee_usd": 0.10, "offramp_pct": 0.70, "fx_spread_pct": 0.20 }, "onramp_note": "USDC on-ramp ~2.44% by card vs ~4.19% for USDT; Bitso off-ramp at blue-market rate." },
         { "category": "p2p", "provider": "Binance P2P", "product": "Bank → USDT → ARS", "route": "USDT → ARS P2P at parallel rate", "time": "20–45 min", "fee_usd": 2.50, "fee_pct": 1.25, "on_money_map": false }
       ]
     }

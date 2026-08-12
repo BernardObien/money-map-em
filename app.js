@@ -9,8 +9,11 @@
     return;
   }
 
+  // Allow deep-linking straight to a corridor, e.g. .../#us-ar — handy for
+  // sharing a single corridor in an email.
+  const hashCorridor = data.corridors.find(c => c.id === location.hash.replace('#', ''));
   const state = {
-    corridorId: data.corridors[0].id,
+    corridorId: hashCorridor ? hashCorridor.id : data.corridors[0].id,
     amount: 200,
     filter: 'all'
   };
@@ -33,12 +36,37 @@
     const displayFee = method.fee_pct >= 0.05
       ? feeUsd
       : (state.amount / 200) * method.fee_usd;
-    const recipient = state.amount - displayFee;
+    let recipient = state.amount - displayFee;
+    // Guard: the recipient can never receive more than was sent. Every fee —
+    // including FX spread — is a cost (subtraction), never a credit. If anything
+    // ever pushes the recipient above the send amount, cap it and log the bug.
+    if (recipient > state.amount) {
+      console.error('Recipient exceeds amount sent for', method.provider, ':', recipient, '>', state.amount);
+      recipient = state.amount * 0.999;
+    }
     return {
       fee_usd: displayFee,
       fee_pct: method.fee_pct,
       recipient: recipient
     };
+  }
+
+  // Decompose a method's total fee into its components for the expandable row.
+  // Stablecoin routes carry an explicit fee_breakdown in data.json; everything
+  // else is shown as a single provider fee.
+  function breakdownRows(m) {
+    const amt = state.amount;
+    const pctRow = (label, pct) => [label, pct.toFixed(2) + '% · $' + (pct / 100 * amt).toFixed(2)];
+    if (m.fee_breakdown) {
+      const b = m.fee_breakdown;
+      const out = [];
+      if (b.onramp_pct != null) out.push(pctRow('On-ramp', b.onramp_pct));
+      if (b.network_fee_usd != null) out.push(['Network fee', '$' + b.network_fee_usd.toFixed(2)]);
+      if (b.offramp_pct != null) out.push(pctRow('Off-ramp', b.offramp_pct));
+      if (b.fx_spread_pct != null) out.push(pctRow('FX spread', b.fx_spread_pct));
+      return out;
+    }
+    return [pctRow('Provider fee', m.fee_pct)];
   }
 
   function renderCorridorTabs() {
@@ -47,11 +75,11 @@
     data.corridors.forEach(c => {
       const tab = document.createElement('div');
       tab.className = 'corridor-tab' + (c.id === state.corridorId ? ' active' : '');
+      tab.title = c.annual_volume_note;
       tab.innerHTML =
-        '<div><span class="corridor-flag">' + c.flag_sender + ' → ' + c.flag_receiver + '</span></div>' +
-        '<div class="corridor-name">' + c.sender + ' → ' + c.receiver_name + '</div>' +
-        '<div class="corridor-vol">' + c.annual_volume_note + '</div>';
-      tab.onclick = () => { state.corridorId = c.id; renderAll(); };
+        '<span class="corridor-flag">' + c.flag_sender + ' → ' + c.flag_receiver + '</span>' +
+        '<span class="corridor-name">' + c.receiver_name + '</span>';
+      tab.onclick = () => { state.corridorId = c.id; location.hash = c.id; renderAll(); };
       nav.appendChild(tab);
     });
   }
@@ -104,7 +132,7 @@
     const savings = worst.fee_usd - best.fee_usd;
 
     document.getElementById('metrics').innerHTML =
-      '<div class="metric"><div class="metric-label">Methods</div><div class="metric-value">' + methods.length + '</div><div class="metric-sub">' + notOnMap + ' not on DCI Money Map</div></div>' +
+      '<div class="metric"><div class="metric-label">Methods</div><div class="metric-value">' + methods.length + '</div><div class="metric-sub">' + notOnMap + ' missing from DCI</div></div>' +
       '<div class="metric"><div class="metric-label">Best fee</div><div class="metric-value">' + best.fee_pct.toFixed(2) + '%</div><div class="metric-sub">' + best.provider + '</div></div>' +
       '<div class="metric"><div class="metric-label">Worst fee</div><div class="metric-value">' + worst.fee_pct.toFixed(2) + '%</div><div class="metric-sub">' + worst.provider + '</div></div>' +
       '<div class="metric"><div class="metric-label">Max savings</div><div class="metric-value">$' + savings.toFixed(2) + '</div><div class="metric-sub">on $' + state.amount + '</div></div>';
@@ -119,7 +147,7 @@
       { id: 'remittance', label: 'Remittance' },
       { id: 'stablecoin', label: 'Stablecoins' },
       { id: 'p2p', label: 'P2P / informal' },
-      { id: 'gap', label: 'Not on Money Map' }
+      { id: 'gap', label: 'Missing from DCI' }
     ];
     filters.forEach(f => {
       const chip = document.createElement('div');
@@ -169,7 +197,7 @@
         '<div class="category-header">' +
           '<span class="category-name">' + (categoryMeta[cat]?.name || cat) + '</span>' +
           '<span class="category-meta">' + items.length + ' method' + (items.length === 1 ? '' : 's') +
-            (notOnMap > 0 ? ' · ' + notOnMap + ' not on DCI Money Map' : '') +
+            (notOnMap > 0 ? ' · ' + notOnMap + ' missing from DCI' : '') +
           '</span>' +
         '</div>';
       items.forEach(m => {
@@ -178,8 +206,15 @@
         row.className = 'method' + (isBest ? ' best' : '') + (!m.on_money_map ? ' gap' : '');
         let providerHtml = '<div style="min-width: 0;"><div class="method-provider"><span class="method-provider-text">' + m.provider + ' · ' + m.product + '</span>';
         if (isBest) providerHtml += '<span class="tag tag-best">★ Best</span>';
-        if (!m.on_money_map) providerHtml += '<span class="tag tag-gap">Not on Money Map</span>';
-        providerHtml += '</div><div class="method-route">' + m.route + '</div></div>';
+        if (!m.on_money_map) providerHtml += '<span class="tag tag-gap">Missing from DCI</span>';
+        providerHtml += '</div><div class="method-route">' + m.route + ' <span class="method-expand">· fee breakdown ▾</span></div></div>';
+
+        const bd = breakdownRows(m);
+        const breakdownHtml =
+          '<div class="method-breakdown" hidden>' +
+            bd.map(r => '<div class="bd-row"><span class="bd-label">' + r[0] + '</span><span class="bd-val">' + r[1] + '</span></div>').join('') +
+            (m.onramp_note ? '<div class="bd-note">' + m.onramp_note + '</div>' : '') +
+          '</div>';
 
         row.innerHTML =
           providerHtml +
@@ -187,7 +222,22 @@
           '<span class="method-fee">$' + m.fee_usd.toFixed(2) + '</span>' +
           '<span class="method-pct">' + m.fee_pct.toFixed(2) + '%</span>' +
           '<span class="method-recipient">$' + m.recipient.toFixed(2) + '</span>' +
-          (m.note ? '<div class="method-note">' + m.note + '</div>' : '');
+          (m.note ? '<div class="method-note">' + m.note + '</div>' : '') +
+          breakdownHtml;
+
+        row.addEventListener('click', () => {
+          const panel = row.querySelector('.method-breakdown');
+          const caret = row.querySelector('.method-expand');
+          if (!panel) return;
+          if (panel.hasAttribute('hidden')) {
+            panel.removeAttribute('hidden');
+            if (caret) caret.textContent = '· fee breakdown ▴';
+          } else {
+            panel.setAttribute('hidden', '');
+            if (caret) caret.textContent = '· fee breakdown ▾';
+          }
+        });
+
         catDiv.appendChild(row);
       });
       list.appendChild(catDiv);
