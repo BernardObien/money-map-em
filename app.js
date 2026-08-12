@@ -1,258 +1,374 @@
 (async function () {
   let data;
   try {
-    const resp = await fetch('data.json');
-    data = await resp.json();
+    data = await (await fetch('data.json')).json();
   } catch (e) {
-    document.getElementById('methods-list').innerHTML =
-      '<div style="padding: 20px; color: #A32D2D;">Could not load data.json. If viewing locally, serve via a local HTTP server.</div>';
+    document.getElementById('results').innerHTML =
+      '<div class="empty">Could not load data.json. If viewing locally, serve via a local HTTP server.</div>';
     return;
   }
 
-  // Allow deep-linking straight to a corridor, e.g. .../#us-ar — handy for
-  // sharing a single corridor in an email.
-  const hashCorridor = data.corridors.find(c => c.id === location.hash.replace('#', ''));
+  // ---- constants ----------------------------------------------------------
+  const SYM = { USD: '$', GBP: '£', NGN: '₦', KES: 'KSh ', ARS: '$' };
+  const SPEED_LABEL = { instant: 'Instant', same_day: 'Same day', lt_3_days: '<3 days' };
+  const SPEED_RANK = { instant: 0, same_day: 1, lt_3_days: 2 };
+  const BADGE_LABEL = { crypto: 'Crypto', wallet: 'Wallet', bank: 'Bank' };
+  const SEND_FILTERS = [['all', 'All methods'], ['bank_ach', 'Bank/ACH'], ['debit_card', 'Debit card'], ['credit_card', 'Credit card'], ['digital_wallet', 'Digital wallet'], ['crypto', 'Crypto']];
+  const RECV_FILTERS = [['all', 'All methods'], ['bank_deposit', 'Bank deposit'], ['wallet', 'Digital wallet'], ['crypto', 'Crypto'], ['other', 'Other']];
+  const SPEED_FILTERS = [['any', 'Any'], ['instant', 'Instant'], ['same_day', 'Same day'], ['lt_3_days', '<3 days']];
+  const PRESETS = [[1, '$1'], [10, '$10'], [100, '$100'], [1000, '$1k'], [10000, '$10k']];
+
+  // ---- state --------------------------------------------------------------
+  const first = data.corridors[0];
   const state = {
-    corridorId: hashCorridor ? hashCorridor.id : data.corridors[0].id,
-    amount: 200,
-    filter: 'all'
+    sender: first.sender,
+    recipient: first.recipient,
+    amount: 100,
+    sendAs: 'usd',      // 'usd' | 'crypto'
+    receiveAs: 'local', // 'local' | 'crypto'
+    speed: 'any',
+    send: 'all',
+    receive: 'all',
+    view: 'list',       // 'list' | 'cards'
+    sort: 'cheapest',   // 'cheapest' | 'fastest'
+    expanded: {}        // method name -> bool
   };
 
-  const categoryMeta = {
-    bank: { name: 'Traditional banking', order: 4 },
-    remittance: { name: 'Remittance services', order: 2 },
-    stablecoin: { name: 'Stablecoins', order: 1 },
-    p2p: { name: 'P2P / informal', order: 3 }
-  };
+  // ---- helpers ------------------------------------------------------------
+  const corridor = () => data.corridors.find(c => c.sender === state.sender && c.recipient === state.recipient);
+  const senders = () => data.corridors.map(c => c.sender).filter((v, i, a) => a.indexOf(v) === i);
+  const recipientsFor = s => data.corridors.filter(c => c.sender === s);
+  const mid = () => data.fx_rates[corridor().fx_pair].mid;
+  const usd = n => '$' + n.toFixed(2);
+  const senderMoney = n => SYM[corridor().sender_currency] + n.toFixed(2);
+  const recvLocal = n => SYM[corridor().recipient_currency] + Math.round(n).toLocaleString();
 
-  document.getElementById('last-updated').textContent = data.meta.last_updated;
-
-  function currentCorridor() {
-    return data.corridors.find(c => c.id === state.corridorId);
+  function compute(m) {
+    const amt = state.amount, b = m.fee_breakdown, M = mid();
+    const send = b.send_fee_pct / 100 * amt + b.send_fee_flat_usd;
+    const fx = b.fx_spread_pct / 100 * amt;
+    const network = b.network_fee_usd;
+    const receive = b.receive_fee_pct / 100 * amt;
+    const total = send + fx + network + receive;
+    const vs = amt > 0 ? total / amt * 100 : 0;
+    const fxRateUsed = M * (1 - b.fx_spread_pct / 100);
+    let recvUsd = amt - total;
+    let recvLocalAmt = recvUsd * M;
+    // Guard: a recipient can never receive more than the mid-market value of what
+    // was sent. Every fee is a subtraction, never a credit.
+    if (recvLocalAmt > amt * M) { console.error('recipient exceeds sent for', m.name); recvLocalAmt = amt * M * 0.999; recvUsd = amt * 0.999; }
+    return { send, fx, network, receive, total, vs, fxRateUsed, recvUsd, recvLocalAmt };
   }
 
-  function computeMethodValues(method) {
-    const feeUsd = (method.fee_pct / 100) * state.amount;
-    const displayFee = method.fee_pct >= 0.05
-      ? feeUsd
-      : (state.amount / 200) * method.fee_usd;
-    let recipient = state.amount - displayFee;
-    // Guard: the recipient can never receive more than was sent. Every fee —
-    // including FX spread — is a cost (subtraction), never a credit. If anything
-    // ever pushes the recipient above the send amount, cap it and log the bug.
-    if (recipient > state.amount) {
-      console.error('Recipient exceeds amount sent for', method.provider, ':', recipient, '>', state.amount);
-      recipient = state.amount * 0.999;
-    }
-    return {
-      fee_usd: displayFee,
-      fee_pct: method.fee_pct,
-      recipient: recipient
-    };
+  function baseMethods() {
+    // currency toggles: if either side is crypto, only crypto-native methods
+    const cryptoOnly = state.sendAs === 'crypto' || state.receiveAs === 'crypto';
+    return corridor().methods.filter(m => !cryptoOnly || m.badge === 'crypto');
   }
 
-  // Decompose a method's total fee into its components for the expandable row.
-  // Stablecoin routes carry an explicit fee_breakdown in data.json; everything
-  // else is shown as a single provider fee.
-  function breakdownRows(m) {
-    const amt = state.amount;
-    const pctRow = (label, pct) => [label, pct.toFixed(2) + '% · $' + (pct / 100 * amt).toFixed(2)];
-    if (m.fee_breakdown) {
-      const b = m.fee_breakdown;
-      const out = [];
-      if (b.onramp_pct != null) out.push(pctRow('On-ramp', b.onramp_pct));
-      if (b.network_fee_usd != null) out.push(['Network fee', '$' + b.network_fee_usd.toFixed(2)]);
-      if (b.offramp_pct != null) out.push(pctRow('Off-ramp', b.offramp_pct));
-      if (b.fx_spread_pct != null) out.push(pctRow('FX spread', b.fx_spread_pct));
-      return out;
-    }
-    return [pctRow('Provider fee', m.fee_pct)];
+  function matchesReceive(m) {
+    if (state.receive === 'all') return true;
+    if (state.receive === 'wallet') return m.receive_method === 'digital_wallet' || m.receive_method === 'mobile_wallet';
+    if (state.receive === 'other') return m.receive_method === 'cash_pickup' || m.receive_method === 'other';
+    return m.receive_method === state.receive;
   }
 
-  function renderCorridorTabs() {
-    const nav = document.getElementById('corridor-tabs');
-    nav.innerHTML = '';
-    data.corridors.forEach(c => {
-      const tab = document.createElement('div');
-      tab.className = 'corridor-tab' + (c.id === state.corridorId ? ' active' : '');
-      tab.title = c.annual_volume_note;
-      tab.innerHTML =
-        '<span class="corridor-flag">' + c.flag_sender + ' → ' + c.flag_receiver + '</span>' +
-        '<span class="corridor-name">' + c.receiver_name + '</span>';
-      tab.onclick = () => { state.corridorId = c.id; location.hash = c.id; renderAll(); };
-      nav.appendChild(tab);
-    });
-  }
-
-  function renderCorridorContext() {
-    const c = currentCorridor();
-    document.getElementById('corridor-context').textContent = c.coverage_note;
-  }
-
-  function renderFxPanel() {
-    const c = currentCorridor();
-    const fx = data.fx_benchmarks[c.receiver === 'NG' ? 'NGN' :
-                                   c.receiver === 'KE' ? 'KES' :
-                                   c.receiver === 'GH' ? 'GHS' :
-                                   c.receiver === 'AR' ? 'ARS' : null];
-    if (!fx) { document.getElementById('fx-panel').innerHTML = ''; return; }
-    const gap = ((fx.parallel - fx.official) / fx.official * 100).toFixed(2);
-    document.getElementById('fx-panel').innerHTML =
-      '<div>' +
-        '<div class="fx-title">FX benchmark · ' + fx.source + '</div>' +
-        '<div class="fx-rates">' +
-          '<div class="fx-rate">Official: <strong>' + fx.official.toLocaleString() + '</strong></div>' +
-          '<div class="fx-rate">Parallel: <strong>' + fx.parallel.toLocaleString() + '</strong></div>' +
-        '</div>' +
-      '</div>' +
-      (parseFloat(gap) > 0.5
-        ? '<div class="fx-gap">Parallel-market gap: ' + gap + '%</div>'
-        : '<div class="fx-gap" style="background: #F1EFE8; color: #5F5E5A;">Unified rate</div>');
-  }
-
-  function renderAmountChips() {
-    const el = document.getElementById('amount-chips');
-    el.innerHTML = '';
-    [50, 100, 200, 500, 1000, 2000].forEach(a => {
-      const chip = document.createElement('button');
-      chip.className = 'amount-chip' + (a === state.amount ? ' active' : '');
-      chip.textContent = '$' + a.toLocaleString();
-      chip.onclick = () => { state.amount = a; renderMetrics(); renderMethods(); };
-      el.appendChild(chip);
-    });
-  }
-
-  function renderMetrics() {
-    const c = currentCorridor();
-    const methods = c.methods.map(m => Object.assign({}, m, computeMethodValues(m)));
-    const sorted = [...methods].sort((a, b) => a.fee_usd - b.fee_usd);
-    const best = sorted[0];
-    const worst = sorted[sorted.length - 1];
-    const notOnMap = methods.filter(m => !m.on_money_map).length;
-    const savings = worst.fee_usd - best.fee_usd;
-
-    document.getElementById('metrics').innerHTML =
-      '<div class="metric"><div class="metric-label">Methods</div><div class="metric-value">' + methods.length + '</div><div class="metric-sub">' + notOnMap + ' missing from DCI</div></div>' +
-      '<div class="metric"><div class="metric-label">Best fee</div><div class="metric-value">' + best.fee_pct.toFixed(2) + '%</div><div class="metric-sub">' + best.provider + '</div></div>' +
-      '<div class="metric"><div class="metric-label">Worst fee</div><div class="metric-value">' + worst.fee_pct.toFixed(2) + '%</div><div class="metric-sub">' + worst.provider + '</div></div>' +
-      '<div class="metric"><div class="metric-label">Max savings</div><div class="metric-value">$' + savings.toFixed(2) + '</div><div class="metric-sub">on $' + state.amount + '</div></div>';
-  }
-
-  function renderFilters() {
-    const el = document.getElementById('filters');
-    el.innerHTML = '';
-    const filters = [
-      { id: 'all', label: 'All methods' },
-      { id: 'bank', label: 'Traditional' },
-      { id: 'remittance', label: 'Remittance' },
-      { id: 'stablecoin', label: 'Stablecoins' },
-      { id: 'p2p', label: 'P2P / informal' },
-      { id: 'gap', label: 'Missing from DCI' }
-    ];
-    filters.forEach(f => {
-      const chip = document.createElement('div');
-      chip.className = 'filter-chip' + (state.filter === f.id ? ' active' : '');
-      chip.textContent = f.label;
-      chip.onclick = () => { state.filter = f.id; renderFilters(); renderMethods(); };
-      el.appendChild(chip);
-    });
-  }
-
-  function renderMethods() {
-    const c = currentCorridor();
-    let methods = c.methods.map(m => Object.assign({}, m, computeMethodValues(m)));
-
-    if (state.filter === 'gap') {
-      methods = methods.filter(m => !m.on_money_map);
-    } else if (state.filter !== 'all') {
-      methods = methods.filter(m => m.category === state.filter);
-    }
-
-    const bestFee = Math.min(...c.methods.map(m => computeMethodValues(m).fee_usd));
-
-    const grouped = {};
-    methods.forEach(m => {
-      if (!grouped[m.category]) grouped[m.category] = [];
-      grouped[m.category].push(m);
-    });
-
-    const orderedCats = Object.keys(grouped).sort(
-      (a, b) => (categoryMeta[a]?.order || 99) - (categoryMeta[b]?.order || 99)
+  function filtered() {
+    let list = baseMethods().filter(m =>
+      (state.speed === 'any' || m.speed_tier === state.speed) &&
+      (state.send === 'all' || m.send_method === state.send) &&
+      matchesReceive(m)
     );
-
-    const list = document.getElementById('methods-list');
-    list.innerHTML = '';
-
-    if (methods.length === 0) {
-      list.innerHTML = '<div style="padding: 20px; color: var(--ink-3); text-align: center;">No methods in this filter.</div>';
-      return;
+    list = list.map(m => ({ m, c: compute(m) }));
+    if (state.sort === 'fastest') list.sort((a, b) => (SPEED_RANK[a.m.speed_tier] - SPEED_RANK[b.m.speed_tier]) || (a.c.total - b.c.total));
+    else list.sort((a, b) => a.c.total - b.c.total);
+    // cheapest tag: single lowest total among the filtered set
+    if (list.length) {
+      const min = Math.min(...list.map(x => x.c.total));
+      let tagged = false;
+      list.forEach(x => { x.cheapest = !tagged && Math.abs(x.c.total - min) < 1e-9; if (x.cheapest) tagged = true; });
     }
+    return list;
+  }
 
-    orderedCats.forEach(cat => {
-      const items = grouped[cat].sort((a, b) => a.fee_usd - b.fee_usd);
-      const catDiv = document.createElement('div');
-      catDiv.className = 'category';
-      const notOnMap = items.filter(m => !m.on_money_map).length;
-      catDiv.innerHTML =
-        '<div class="category-header">' +
-          '<span class="category-name">' + (categoryMeta[cat]?.name || cat) + '</span>' +
-          '<span class="category-meta">' + items.length + ' method' + (items.length === 1 ? '' : 's') +
-            (notOnMap > 0 ? ' · ' + notOnMap + ' missing from DCI' : '') +
-          '</span>' +
-        '</div>';
-      items.forEach(m => {
-        const isBest = Math.abs(m.fee_usd - bestFee) < 0.01;
-        const row = document.createElement('div');
-        row.className = 'method' + (isBest ? ' best' : '') + (!m.on_money_map ? ' gap' : '');
-        let providerHtml = '<div style="min-width: 0;"><div class="method-provider"><span class="method-provider-text">' + m.provider + ' · ' + m.product + '</span>';
-        if (isBest) providerHtml += '<span class="tag tag-best">★ Best</span>';
-        if (!m.on_money_map) providerHtml += '<span class="tag tag-gap">Missing from DCI</span>';
-        providerHtml += '</div><div class="method-route">' + m.route + ' <span class="method-expand">· fee breakdown ▾</span></div></div>';
+  const activeFilterCount = () =>
+    (state.speed !== 'any' ? 1 : 0) + (state.send !== 'all' ? 1 : 0) + (state.receive !== 'all' ? 1 : 0);
 
-        const bd = breakdownRows(m);
-        const breakdownHtml =
-          '<div class="method-breakdown" hidden>' +
-            bd.map(r => '<div class="bd-row"><span class="bd-label">' + r[0] + '</span><span class="bd-val">' + r[1] + '</span></div>').join('') +
-            (m.onramp_note ? '<div class="bd-note">' + m.onramp_note + '</div>' : '') +
-          '</div>';
+  // ---- static controls (built once) --------------------------------------
+  function buildControls() {
+    // route
+    const sp = document.getElementById('sender-pick');
+    sp.innerHTML = senders().map(s => {
+      const c = data.corridors.find(x => x.sender === s);
+      return `<option value="${s}" ${s === state.sender ? 'selected' : ''}>${c.sender_flag} ${c.sender_name}</option>`;
+    }).join('');
+    sp.onchange = () => {
+      state.sender = sp.value;
+      const rs = recipientsFor(state.sender);
+      state.recipient = rs[0].recipient;
+      buildRecipient();
+      resetOnRouteChange();
+    };
+    buildRecipient();
 
-        row.innerHTML =
-          providerHtml +
-          '<span class="method-time">' + m.time + '</span>' +
-          '<span class="method-fee">$' + m.fee_usd.toFixed(2) + '</span>' +
-          '<span class="method-pct">' + m.fee_pct.toFixed(2) + '%</span>' +
-          '<span class="method-recipient">$' + m.recipient.toFixed(2) + '</span>' +
-          (m.note ? '<div class="method-note">' + m.note + '</div>' : '') +
-          breakdownHtml;
-
-        row.addEventListener('click', () => {
-          const panel = row.querySelector('.method-breakdown');
-          const caret = row.querySelector('.method-expand');
-          if (!panel) return;
-          if (panel.hasAttribute('hidden')) {
-            panel.removeAttribute('hidden');
-            if (caret) caret.textContent = '· fee breakdown ▴';
-          } else {
-            panel.setAttribute('hidden', '');
-            if (caret) caret.textContent = '· fee breakdown ▾';
-          }
-        });
-
-        catDiv.appendChild(row);
-      });
-      list.appendChild(catDiv);
+    // presets
+    document.getElementById('presets').innerHTML = PRESETS.map(([v, l]) =>
+      `<button class="preset" data-v="${v}">${l}</button>`).join('');
+    document.querySelectorAll('.preset').forEach(btn => btn.onclick = () => {
+      state.amount = Number(btn.dataset.v);
+      document.getElementById('amount-input').value = state.amount.toFixed(2);
+      renderAll();
     });
+
+    // amount input
+    const ai = document.getElementById('amount-input');
+    ai.oninput = () => {
+      const cleaned = ai.value.replace(/[^\d.]/g, '');
+      const n = parseFloat(cleaned);
+      state.amount = isNaN(n) ? 0 : n;
+      renderAll();
+    };
+
+    // send/receive-as toggles
+    buildToggles();
+
+    // speed chips
+    document.getElementById('speed-chips').innerHTML = SPEED_FILTERS.map(([v, l]) =>
+      `<button class="chip" data-v="${v}">${l}</button>`).join('');
+    document.querySelectorAll('#speed-chips .chip').forEach(ch => ch.onclick = () => { state.speed = ch.dataset.v; renderAll(); });
+
+    // send/receive filter selects
+    const sf = document.getElementById('send-filter');
+    sf.innerHTML = SEND_FILTERS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+    sf.onchange = () => { state.send = sf.value; renderAll(); };
+    const rf = document.getElementById('receive-filter');
+    rf.innerHTML = RECV_FILTERS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+    rf.onchange = () => { state.receive = rf.value; renderAll(); };
+
+    // sort + view + clear
+    document.getElementById('sort-pick').onchange = e => { state.sort = e.target.value; renderAll(); };
+    document.getElementById('view-toggle').innerHTML =
+      `<button data-v="list">List</button><button data-v="cards">Cards</button>`;
+    document.querySelectorAll('#view-toggle button').forEach(b => b.onclick = () => { state.view = b.dataset.v; renderAll(); });
+    document.getElementById('clear-filters').onclick = () => {
+      state.speed = 'any'; state.send = 'all'; state.receive = 'all';
+      document.getElementById('send-filter').value = 'all';
+      document.getElementById('receive-filter').value = 'all';
+      renderAll();
+    };
+
+    // topbar meta + footer
+    document.getElementById('topbar-meta').innerHTML =
+      `Rates as of ${data.meta.rate_timestamp}<br>${data.meta.fx_source}`;
+    document.getElementById('footer').innerHTML =
+      `Rates from ${data.meta.fx_source}, ${data.meta.last_updated}. Estimates for the entered amount; costs shift with amount. FX spread, send and receive fees scale; network and flat wire fees do not. Not live quotes. ` +
+      `Built by <a href="https://whoisbob.co" target="_blank" rel="noopener">Bernard O'bien</a> · Cambio · extends the <a href="https://mit-dci.github.io/payments-dashboard/" target="_blank" rel="noopener">MIT DCI Money Map</a>. ` +
+      `<a href="https://github.com/BernardObien/money-map-em" target="_blank" rel="noopener">Source</a>.`;
   }
 
+  function buildRecipient() {
+    const rp = document.getElementById('recipient-pick');
+    rp.innerHTML = recipientsFor(state.sender).map(c =>
+      `<option value="${c.recipient}" ${c.recipient === state.recipient ? 'selected' : ''}>${c.recipient_flag} ${c.recipient_name}</option>`).join('');
+    rp.onchange = () => { state.recipient = rp.value; resetOnRouteChange(); };
+  }
+
+  function buildToggles() {
+    const c = corridor();
+    document.getElementById('amount-cur').textContent = SYM[c.sender_currency];
+    document.getElementById('sendas-seg').innerHTML =
+      `<button data-v="usd">${c.sender_currency}</button><button data-v="crypto">Crypto</button>`;
+    document.getElementById('receiveas-seg').innerHTML =
+      `<button data-v="local">${c.recipient_currency}</button><button data-v="crypto">Crypto</button>`;
+    document.querySelectorAll('#sendas-seg button').forEach(b => b.onclick = () => { state.sendAs = b.dataset.v; renderAll(); });
+    document.querySelectorAll('#receiveas-seg button').forEach(b => b.onclick = () => { state.receiveAs = b.dataset.v; renderAll(); });
+  }
+
+  function resetOnRouteChange() {
+    state.sendAs = 'usd'; state.receiveAs = 'local';
+    state.speed = 'any'; state.send = 'all'; state.receive = 'all'; state.expanded = {};
+    document.getElementById('send-filter').value = 'all';
+    document.getElementById('receive-filter').value = 'all';
+    buildToggles();
+    renderAll();
+  }
+
+  // ---- dynamic render -----------------------------------------------------
   function renderAll() {
-    renderCorridorTabs();
-    renderCorridorContext();
-    renderFxPanel();
-    renderAmountChips();
-    renderMetrics();
-    renderFilters();
-    renderMethods();
+    // active classes on controls
+    document.querySelectorAll('.preset').forEach(b => b.classList.toggle('active', Number(b.dataset.v) === state.amount));
+    document.querySelectorAll('#speed-chips .chip').forEach(ch => ch.classList.toggle('on', ch.dataset.v === state.speed));
+    document.querySelectorAll('#sendas-seg button').forEach(b => b.classList.toggle('on', b.dataset.v === state.sendAs));
+    document.querySelectorAll('#receiveas-seg button').forEach(b => b.classList.toggle('on', b.dataset.v === state.receiveAs));
+    document.querySelectorAll('#view-toggle button').forEach(b => b.classList.toggle('on', b.dataset.v === state.view));
+    document.getElementById('send-filter').classList.toggle('on', state.send !== 'all');
+    document.getElementById('receive-filter').classList.toggle('on', state.receive !== 'all');
+    const fc = activeFilterCount();
+    document.getElementById('filter-count').textContent = fc ? `${fc} filter${fc > 1 ? 's' : ''}` : '';
+
+    renderHero();
+    renderResults();
   }
 
+  function renderHero() {
+    const c = corridor(), M = mid(), amt = state.amount;
+    const receiveHero = state.receiveAs === 'crypto'
+      ? '$' + amt.toFixed(2)
+      : recvLocal(amt * M);
+    document.getElementById('hero-main').innerHTML =
+      `<span style="font-size:11px; font-weight:700; letter-spacing:0.06em; color:var(--ink-3); text-transform:uppercase;">You send</span> ` +
+      `<span class="send">${senderMoney(amt)}</span><span class="arrow">→</span>` +
+      `<span style="font-size:11px; font-weight:700; letter-spacing:0.06em; color:var(--ink-3); text-transform:uppercase;">They receive</span> ` +
+      `<span class="receive">${receiveHero}${state.receiveAs === 'crypto' ? ' <span style="font-size:13px;font-weight:600;color:var(--ink-3)">in stablecoin</span>' : ''}</span>`;
+
+    const bench = data.fx_benchmarks[c.recipient_currency];
+    let sub;
+    if (state.receiveAs === 'crypto') {
+      sub = `crypto out · recipient holds USD-pegged stablecoin. Actual amount received varies by method fee, below.`;
+    } else {
+      sub = `at mid-market · 1 ${c.sender_currency} = ${SYM[c.recipient_currency]}${M.toLocaleString()}`;
+      if (bench) sub += `<span class="infodot">i<span class="tip">${bench.note}</span></span>`;
+      sub += `<br>Actual amount received varies by method, below.`;
+    }
+    document.getElementById('hero-sub').innerHTML = sub;
+  }
+
+  function renderResults() {
+    const list = filtered();
+    const total = baseMethods().length;
+    const shown = list.length;
+    const fc = activeFilterCount();
+
+    // meta
+    document.getElementById('results-count').innerHTML = fc
+      ? `${shown} <span style="color:var(--ink-3);font-weight:400">of ${total} methods</span>`
+      : `${total} methods available`;
+    document.getElementById('results-note').textContent = fc
+      ? `${total - shown} hidden by filters`
+      : (state.sort === 'cheapest' ? 'Sorted cheapest first · position communicates rank' : 'Sorted fastest first');
+
+    const el = document.getElementById('results');
+    if (!shown) { el.innerHTML = '<div class="listwrap"><div class="empty">No methods match these filters.</div></div>'; return; }
+    el.innerHTML = state.view === 'cards' ? renderCards(list) : renderList(list);
+    wireRows();
+  }
+
+  function nameCell(x) {
+    let tags = '';
+    if (x.cheapest) tags += ' <span class="pill-cheapest">Cheapest</span>';
+    if (!x.m.on_money_map) tags += ' <span class="tag-missing" title="Not covered by the current DCI Money Map">Missing from DCI</span>';
+    return tags;
+  }
+
+  function renderList(list) {
+    const head =
+      `<div class="list-head"><span>#</span><span>Method</span><span class="r">Total cost</span>` +
+      `<span class="r c-vs">vs mid-market</span><span class="r c-speed">Speed</span><span class="r">They receive</span><span></span></div>`;
+    const rows = list.map((x, i) => {
+      const c = x.c, m = x.m;
+      const incl = m.fee_breakdown.network_fee_usd > 0 ? `<span class="m-incl">incl. ${usd(m.fee_breakdown.network_fee_usd)} network</span>` : '';
+      const recv = state.receiveAs === 'crypto' ? usd(c.recvUsd) : recvLocal(c.recvLocalAmt);
+      const open = state.expanded[m.name];
+      return `<div class="row" data-name="${m.name}">` +
+        `<span class="row-num">${i + 1}</span>` +
+        `<div class="row-method"><div class="m-name">${m.name}${nameCell(x)}</div><div class="m-sub">${m.subtitle}</div></div>` +
+        `<div class="m-total">${usd(c.total)}${incl}</div>` +
+        `<div class="m-vs c-vs">${c.vs.toFixed(2)}%</div>` +
+        `<div class="m-speed c-speed">${SPEED_LABEL[m.speed_tier]}<span class="detail">${m.speed_detail}</span></div>` +
+        `<div class="m-receive">${recv}</div>` +
+        `<div class="caret">${open ? '▲' : '▾'}</div>` +
+        (open ? breakdownPanel(x) : '') +
+        `</div>`;
+    }).join('');
+    return `<div class="listwrap">${head}${rows}</div>`;
+  }
+
+  function breakdownPanel(x) {
+    const c = x.c, m = x.m, cor = corridor();
+    const cryptoOut = state.receiveAs === 'crypto';
+    const rateCol = cryptoOut
+      ? `<div class="bd-col"><div class="bd-title">FX rate used</div><div class="bd-rate">crypto out</div><div class="bd-meta">Recipient holds USD-pegged stablecoin — no local-currency conversion applied.</div></div>`
+      : `<div class="bd-col"><div class="bd-title">FX rate used</div><div class="bd-rate">1 ${cor.sender_currency} = ${SYM[cor.recipient_currency]}${c.fxRateUsed.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>` +
+        `<div class="bd-meta">Mid-market ${SYM[cor.recipient_currency]}${mid().toLocaleString()} · spread ${m.fee_breakdown.fx_spread_pct.toFixed(2)}%<br>${data.meta.fx_source} · ${data.meta.rate_timestamp}</div></div>`;
+    return `<div class="breakdown">` +
+      `<div class="bd-col"><div class="bd-title">Fee breakdown</div>` +
+        line('Send fee', usd(c.send)) +
+        line('FX spread (' + m.fee_breakdown.fx_spread_pct.toFixed(2) + '%)', usd(c.fx)) +
+        (c.network > 0 ? line('Network fee', usd(c.network)) : line('Network fee', '—')) +
+        line('Receive / cash-out fee', usd(c.receive)) +
+        `<div class="bd-line total"><span>Total cost</span><span class="v">${usd(c.total)}</span></div></div>` +
+      rateCol +
+      `<div class="bd-col"><div class="bd-title">Range disclosure</div><div class="bd-range">${usd(m.range_low)} – ${usd(m.range_high)}</div>` +
+        `<div class="bd-meta">${m.breakdown_note || 'Estimate range for this method at the current amount.'}<br>Send: ${labelSend(m.send_method)} · Receive: ${labelRecv(m.receive_method)}</div></div>` +
+      `</div>`;
+  }
+  const line = (l, v) => `<div class="bd-line"><span>${l}</span><span class="v">${v}</span></div>`;
+  const labelSend = v => ({ bank_ach: 'Bank/ACH', debit_card: 'Debit card', credit_card: 'Credit card', digital_wallet: 'Digital wallet', crypto: 'Crypto wallet' }[v] || v);
+  const labelRecv = v => ({ bank_deposit: 'Bank deposit', digital_wallet: 'Digital wallet', mobile_wallet: 'Mobile wallet', cash_pickup: 'Cash pickup', crypto: 'Crypto wallet', other: 'Other' }[v] || v);
+
+  function renderCards(list) {
+    const cards = list.map(x => {
+      const c = x.c, m = x.m;
+      const recv = state.receiveAs === 'crypto' ? usd(c.recvUsd) : recvLocal(c.recvLocalAmt);
+      return `<div class="mcard" data-name="${m.name}">` +
+        `<div class="mcard-badge"><span class="badge-type">${BADGE_LABEL[m.badge]}</span>${x.cheapest ? '<span class="pill-cheapest">Cheapest</span>' : (!m.on_money_map ? '<span class="tag-missing">Missing from DCI</span>' : '')}</div>` +
+        `<div class="mcard-name">${m.name}</div>` +
+        `<div class="mcard-sub">${m.subtitle}</div>` +
+        `<div class="mcard-hero-l">They receive</div><div class="mcard-hero">${recv}</div>` +
+        line2('Total cost', usd(c.total)) +
+        line2('Send fee', usd(c.send)) +
+        line2('FX spread', usd(c.fx)) +
+        line2('Network fee', c.network > 0 ? usd(c.network) : '—') +
+        line2('Speed', SPEED_LABEL[m.speed_tier]) +
+        `<button class="mcard-full" data-full="${m.name}">Full breakdown →</button>` +
+        `</div>`;
+    }).join('');
+    return `<div class="cardgrid">${cards}</div>`;
+  }
+  const line2 = (l, v) => `<div class="mcard-line"><span>${l}</span><span class="v">${v}</span></div>`;
+
+  function wireRows() {
+    if (state.view === 'list') {
+      document.querySelectorAll('.row').forEach(r => r.onclick = () => {
+        const n = r.dataset.name; state.expanded[n] = !state.expanded[n]; renderResults();
+      });
+    } else {
+      document.querySelectorAll('.mcard-full').forEach(b => b.onclick = () => {
+        // switch to list and expand that method
+        state.view = 'list'; state.expanded[b.dataset.full] = true; renderAll();
+        const row = document.querySelector(`.row[data-name="${CSS.escape(b.dataset.full)}"]`);
+        if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  }
+
+  // ---- deep-linking (shareable presets, e.g. ?route=us-ng&view=cards) -----
+  function applyParams() {
+    const q = new URLSearchParams(location.search);
+    const route = q.get('route');
+    if (route) {
+      const cor = data.corridors.find(c => c.id === route);
+      if (cor) {
+        state.sender = cor.sender; state.recipient = cor.recipient;
+        document.getElementById('sender-pick').value = cor.sender;
+        buildRecipient();
+        document.getElementById('recipient-pick').value = cor.recipient;
+        buildToggles();
+      }
+    }
+    if (q.get('amount')) { const n = parseFloat(q.get('amount')); if (!isNaN(n)) { state.amount = n; document.getElementById('amount-input').value = n.toFixed(2); } }
+    if (q.get('view')) state.view = q.get('view');
+    if (q.get('sort')) { state.sort = q.get('sort'); document.getElementById('sort-pick').value = state.sort; }
+    if (q.get('speed')) state.speed = q.get('speed');
+    if (q.get('send')) { state.send = q.get('send'); document.getElementById('send-filter').value = state.send; }
+    if (q.get('receive')) { state.receive = q.get('receive'); document.getElementById('receive-filter').value = state.receive; }
+    if (q.get('sendAs')) state.sendAs = q.get('sendAs');
+    if (q.get('receiveAs')) state.receiveAs = q.get('receiveAs');
+    if (q.get('expand')) state.expanded[q.get('expand')] = true;
+  }
+
+  // ---- boot ---------------------------------------------------------------
+  buildControls();
+  applyParams();
   renderAll();
 })();

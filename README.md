@@ -4,6 +4,18 @@ An open extension of the [MIT DCI Money Map](https://mit-dci.github.io/payments-
 
 **Live prototype:** https://bernardobien.github.io/money-map-em/
 
+## v0.3 changelog
+
+Full redesign following external design feedback. The reviewer built a wireframe prototype of the target UX; their proposed flow forms the basis of this version.
+
+- **Primary user flow — route → amount → currency → results.** Route is a sender/recipient dropdown pair; amount is a free-text field with quick-select presets ($1 / $10 / $100 / $1k / $10k); send/receive currency toggles (fiat or crypto) filter the method set. The intent is that the user always knows what to do next.
+- **Immediate result header** — "You send $X → they receive ₦Y" at mid-market, with the effective rate and a parallel-market info note for NGN/ARS.
+- **Per-method fee breakdown** — every row expands to Fee breakdown (send / FX spread / network / receive / total), FX rate used vs mid-market with source and timestamp, and a range disclosure. List and card views, sortable by cheapest or fastest, filterable by speed / send method / receive method. US→Nigeria is decomposed to match the reviewer's wireframe exactly.
+- **Methodology corrections carried forward** — NGN off-ramp at retail rates, Coinbase card-fee split (USDC ~2.44% vs USDT ~4.19%), and a guard so a recipient can never receive more than the mid-market value of what was sent. FX spread / send / receive fees scale with amount; network and flat wire fees do not.
+- **Deferred, per the reviewer** — map visualisation and cost-spectrum chart are intentionally not built yet, to be added later behind a control. Gas Fees and Stablecoin Use are stubbed as coming-soon tabs.
+
+Credit: design feedback and wireframe from an external reviewer. Their proposed flow is the basis of v0.3.
+
 ## v0.2 changelog
 
 Revised after a round of feedback from an early external reviewer. Changes:
