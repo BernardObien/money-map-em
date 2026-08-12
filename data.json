@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "version": "0.1.0",
+    "last_updated": "2026-08-12",
+    "fx_source": "Parallel-market rates from Aboki FX (NGN), BCRA blue-dollar (ARS), Central Bank of Kenya (KES), Bank of Ghana (GHS)",
+    "notes": "Illustrative August 2026 rates. Numbers reflect published fee schedules and typical off-ramp spreads observed in live corridors. For production use, integrate with provider APIs (see roadmap in README).",
+    "maintainer": "Bernard O'bien / Cambio",
+    "contact": "obien@mit.edu"
+  },
+  "fx_benchmarks": {
+    "NGN": { "official": 1365, "parallel": 1428, "source": "CBN official window / Aboki FX parallel" },
+    "KES": { "official": 129.5, "parallel": 129.5, "source": "CBK unified rate" },
+    "GHS": { "official": 15.2, "parallel": 15.8, "source": "BOG official / Ghana forex bureaux" },
+    "ARS": { "official": 1350, "parallel": 1495, "source": "BCRA official / blue-dollar market" }
+  },
+  "corridors": [
+    {
+      "id": "us-ng",
+      "sender": "US",
+      "receiver": "NG",
+      "receiver_name": "Nigeria",
+      "flag_sender": "🇺🇸",
+      "flag_receiver": "🇳🇬",
+      "annual_volume_usd": 20000000000,
+      "annual_volume_note": "$20B/yr · World Bank data",
+      "fx_gap_pct": 4.62,
+      "coverage_note": "Nigeria is Africa's largest remittance corridor. Parallel-market FX spread ~4.6% vs official.",
+      "methods": [
+        { "category": "bank", "provider": "Chase", "product": "International Wire", "route": "ACH → SWIFT → Bank", "time": "3–5 days", "fee_usd": 29.00, "fee_pct": 14.50, "on_money_map": true },
+        { "category": "bank", "provider": "Bank of America", "product": "International Wire", "route": "ACH → SWIFT → Bank", "time": "3–5 days", "fee_usd": 25.00, "fee_pct": 12.50, "on_money_map": true },
+        { "category": "bank", "provider": "Western Union", "product": "Bank → Bank", "route": "Bank funding → Bank deposit", "time": "1–3 days", "fee_usd": 15.50, "fee_pct": 7.75, "on_money_map": true },
+        { "category": "remittance", "provider": "Xoom (PayPal)", "product": "Debit → Bank", "route": "Debit card → Bank deposit", "time": "Minutes", "fee_usd": 8.00, "fee_pct": 4.00, "on_money_map": true },
+        { "category": "remittance", "provider": "Remitly", "product": "Debit → Bank", "route": "Debit → Bank deposit", "time": "Minutes", "fee_usd": 6.00, "fee_pct": 3.00, "on_money_map": true },
+        { "category": "remittance", "provider": "Sendwave", "product": "Debit → Bank", "route": "Debit → Bank deposit", "time": "Minutes", "fee_usd": 5.00, "fee_pct": 2.50, "on_money_map": false },
+        { "category": "remittance", "provider": "LemFi", "product": "ACH → Bank", "route": "ACH → Bank deposit", "time": "Same day", "fee_usd": 3.50, "fee_pct": 1.75, "on_money_map": false },
+        { "category": "remittance", "provider": "NALA", "product": "Debit → Mobile wallet", "route": "Debit → OPay / PalmPay wallet", "time": "Minutes", "fee_usd": 4.00, "fee_pct": 2.00, "on_money_map": false },
+        { "category": "remittance", "provider": "Grey", "product": "ACH → Bank", "route": "ACH → Bank deposit", "time": "Same day", "fee_usd": 4.50, "fee_pct": 2.25, "on_money_map": false },
+        { "category": "remittance", "provider": "ChipperCash", "product": "Debit → Wallet", "route": "Debit → ChipperCash NGN wallet", "time": "Minutes", "fee_usd": 5.50, "fee_pct": 2.75, "on_money_map": false },
+        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Cash App → Binance P2P", "route": "USDT → NGN via P2P off-ramp", "time": "15–30 min", "fee_usd": 1.50, "fee_pct": 0.75, "on_money_map": false },
+        { "category": "stablecoin", "provider": "USDC on Base", "product": "Coinbase → Yellow Card", "route": "USDC → NGN via Yellow Card", "time": "20–40 min", "fee_usd": 3.00, "fee_pct": 1.50, "on_money_map": false },
+        { "category": "stablecoin", "provider": "USDT on Ethereum", "product": "Kraken → local exchange", "route": "USDT → NGN via Nigerian exchange", "time": "1–2 hours", "fee_usd": 12.00, "fee_pct": 6.00, "on_money_map": true },
+        { "category": "p2p", "provider": "Binance P2P", "product": "Bank → USDT → NGN", "route": "Bank → USDT purchase → P2P sell to NGN", "time": "15–45 min", "fee_usd": 2.00, "fee_pct": 1.00, "on_money_map": false },
+        { "category": "p2p", "provider": "Noones", "product": "ACH → USDT → NGN cash", "route": "ACH → USDT → P2P cash pickup", "time": "30–60 min", "fee_usd": 3.00, "fee_pct": 1.50, "on_money_map": false }
+      ]
+    },
+    {
+      "id": "us-ke",
+      "sender": "US",
+      "receiver": "KE",
+      "receiver_name": "Kenya",
+      "flag_sender": "🇺🇸",
+      "flag_receiver": "🇰🇪",
+      "annual_volume_usd": 4200000000,
+      "annual_volume_note": "$4.2B/yr · CBK data",
+      "fx_gap_pct": 0.0,
+      "coverage_note": "M-Pesa terminates ~60% of inbound remittances. Almost no representation of mobile-money receive on DCI Money Map.",
+      "methods": [
+        { "category": "bank", "provider": "Chase", "product": "International Wire", "route": "ACH → SWIFT → Bank", "time": "3–5 days", "fee_usd": 29.00, "fee_pct": 14.50, "on_money_map": false },
+        { "category": "bank", "provider": "Western Union", "product": "Bank → Bank", "route": "Bank funding → Bank", "time": "1–3 days", "fee_usd": 15.50, "fee_pct": 7.75, "on_money_map": false },
+        { "category": "remittance", "provider": "Remitly", "product": "Debit → M-Pesa", "route": "Debit → M-Pesa wallet direct", "time": "Minutes", "fee_usd": 3.99, "fee_pct": 2.00, "on_money_map": false },
+        { "category": "remittance", "provider": "WorldRemit", "product": "Debit → M-Pesa", "route": "Debit → M-Pesa wallet", "time": "Minutes", "fee_usd": 3.99, "fee_pct": 2.00, "on_money_map": false },
+        { "category": "remittance", "provider": "Sendwave", "product": "Debit → M-Pesa", "route": "Debit → M-Pesa wallet", "time": "Minutes", "fee_usd": 5.00, "fee_pct": 2.50, "on_money_map": false, "note": "No upfront fee; effective cost is ~2.5% FX spread, shown here so it is not misread as free" },
+        { "category": "remittance", "provider": "Wise", "product": "ACH → M-Pesa", "route": "ACH → M-Pesa wallet", "time": "Hours", "fee_usd": 4.50, "fee_pct": 2.25, "on_money_map": false },
+        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Coinbase → local exchange", "route": "USDT → KES via BitPesa/Kotani", "time": "20–40 min", "fee_usd": 2.50, "fee_pct": 1.25, "on_money_map": false },
+        { "category": "stablecoin", "provider": "USDC on Base", "product": "Yellow Card KE", "route": "USDC → KES → M-Pesa", "time": "20–40 min", "fee_usd": 3.50, "fee_pct": 1.75, "on_money_map": false },
+        { "category": "p2p", "provider": "Binance P2P", "product": "Bank → USDT → KES", "route": "USDT → KES → M-Pesa", "time": "20–45 min", "fee_usd": 2.00, "fee_pct": 1.00, "on_money_map": false }
+      ]
+    },
+    {
+      "id": "uk-ng",
+      "sender": "UK",
+      "receiver": "NG",
+      "receiver_name": "Nigeria",
+      "flag_sender": "🇬🇧",
+      "flag_receiver": "🇳🇬",
+      "annual_volume_usd": 4500000000,
+      "annual_volume_note": "$4.5B/yr · UK-Nigeria is 2nd largest inbound",
+      "fx_gap_pct": 4.62,
+      "coverage_note": "UK-Nigeria not covered on DCI Money Map (US-only origination). LemFi, Sendwave dominate.",
+      "methods": [
+        { "category": "bank", "provider": "Barclays", "product": "International Payment", "route": "Bank → SWIFT → Bank", "time": "3–5 days", "fee_usd": 25.00, "fee_pct": 12.50, "on_money_map": false },
+        { "category": "remittance", "provider": "LemFi", "product": "Bank → Bank", "route": "Faster Payments → NGN Bank", "time": "Same day", "fee_usd": 2.50, "fee_pct": 1.25, "on_money_map": false },
+        { "category": "remittance", "provider": "Sendwave", "product": "Debit → Bank", "route": "Debit → NGN Bank", "time": "Minutes", "fee_usd": 4.00, "fee_pct": 2.00, "on_money_map": false },
+        { "category": "remittance", "provider": "Wise", "product": "Bank → Bank", "route": "Faster Payments → NGN Bank", "time": "Hours", "fee_usd": 6.50, "fee_pct": 3.25, "on_money_map": false },
+        { "category": "remittance", "provider": "Grey", "product": "Bank → Bank", "route": "Faster Payments → NGN Bank", "time": "Same day", "fee_usd": 4.00, "fee_pct": 2.00, "on_money_map": false },
+        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Revolut → P2P", "route": "GBP → USDT → NGN P2P", "time": "20–40 min", "fee_usd": 1.75, "fee_pct": 0.88, "on_money_map": false },
+        { "category": "stablecoin", "provider": "USDC on Base", "product": "Revolut → Yellow Card", "route": "GBP → USDC → NGN", "time": "30–60 min", "fee_usd": 3.50, "fee_pct": 1.75, "on_money_map": false },
+        { "category": "p2p", "provider": "Binance P2P (GBP)", "product": "Bank → USDT → NGN", "route": "GBP → USDT → NGN P2P", "time": "20–45 min", "fee_usd": 2.25, "fee_pct": 1.13, "on_money_map": false }
+      ]
+    },
+    {
+      "id": "us-ar",
+      "sender": "US",
+      "receiver": "AR",
+      "receiver_name": "Argentina",
+      "flag_sender": "🇺🇸",
+      "flag_receiver": "🇦🇷",
+      "annual_volume_usd": 1000000000,
+      "annual_volume_note": "$1B/yr · World Bank data",
+      "fx_gap_pct": 10.74,
+      "coverage_note": "Parallel-market (blue-dollar) FX gap is ~10.7% vs official. Money Map uses undisclosed FX benchmark; this materially changes 'best rate' calculation.",
+      "methods": [
+        { "category": "bank", "provider": "Citi", "product": "Global Transfer", "route": "USD → ARS at official rate", "time": "3–5 days", "fee_usd": 35.00, "fee_pct": 17.50, "on_money_map": true, "note": "Settled at official rate; recipient loses ~10.7% vs blue-dollar" },
+        { "category": "remittance", "provider": "Western Union", "product": "Debit → Bank", "route": "Debit → ARS at official rate", "time": "Minutes", "fee_usd": 3.25, "fee_pct": 1.63, "on_money_map": true, "note": "Fee low but FX at official rate; effective cost ~12% at parallel benchmark" },
+        { "category": "remittance", "provider": "Wise", "product": "ACH → Bank", "route": "ACH → ARS", "time": "Hours", "fee_usd": 5.50, "fee_pct": 2.75, "on_money_map": true },
+        { "category": "stablecoin", "provider": "USDT on Tron", "product": "Coinbase → Lemon Cash / Belo", "route": "USDT → ARS at blue-dollar rate", "time": "15–30 min", "fee_usd": 2.00, "fee_pct": 1.00, "on_money_map": false, "note": "Settles at parallel market rate; effective savings vs bank ~10%" },
+        { "category": "stablecoin", "provider": "USDC on Base", "product": "Bitso Argentina", "route": "USDC → ARS", "time": "20–40 min", "fee_usd": 3.00, "fee_pct": 1.50, "on_money_map": false },
+        { "category": "p2p", "provider": "Binance P2P", "product": "Bank → USDT → ARS", "route": "USDT → ARS P2P at parallel rate", "time": "20–45 min", "fee_usd": 2.50, "fee_pct": 1.25, "on_money_map": false }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Money Map EM Extension - Emerging market corridor rate transparency, extending MIT DCI's payments dashboard to Africa and LatAm">
+<title>Money Map EM · Corridor rate transparency for emerging markets</title>
+<style>
+  :root {
+    --ink: #0F1419;
+    --ink-2: #4A4A48;
+    --ink-3: #7A7A76;
+    --line: #E8E6DF;
+    --line-2: #D3D1C7;
+    --bg: #FBFAF6;
+    --card: #FFFFFF;
+    --accent: #185FA5;
+    --accent-bg: #E6F1FB;
+    --accent-border: #B5D4F4;
+    --success: #0F6E56;
+    --success-bg: #E1F5EE;
+    --success-border: #9FE1CB;
+    --warn: #854F0B;
+    --warn-bg: #FAEEDA;
+    --warn-border: #FAC775;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "SF Mono", Monaco, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--ink);
+    background: var(--bg);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 24px; }
+  header { padding: 24px 0 12px; border-bottom: 0.5px solid var(--line); margin-bottom: 24px; }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .brand-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+  .brand-title { font-size: 16px; font-weight: 500; margin: 0; }
+  .brand-sub { font-size: 12px; color: var(--ink-3); }
+  h1 { font-size: 22px; font-weight: 500; margin: 8px 0 4px; }
+  .lede { font-size: 14px; color: var(--ink-2); max-width: 780px; margin: 0 0 12px; line-height: 1.6; }
+  .attrib {
+    font-size: 11px; color: var(--ink-3);
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  .attrib-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border: 0.5px solid var(--line-2); border-radius: 999px;
+  }
+  .attrib a { color: var(--accent); text-decoration: none; }
+  .attrib a:hover { text-decoration: underline; }
+
+  .callout {
+    background: var(--warn-bg); border: 0.5px solid var(--warn-border);
+    color: var(--warn); padding: 10px 14px; border-radius: 8px;
+    font-size: 12px; margin-bottom: 20px; line-height: 1.6;
+  }
+  .callout strong { font-weight: 500; }
+
+  nav.corridors {
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px;
+    margin-bottom: 20px; border-bottom: 0.5px solid var(--line);
+  }
+  .corridor-tab {
+    flex-shrink: 0;
+    padding: 8px 14px; border-radius: 6px; cursor: pointer;
+    font-size: 13px; color: var(--ink-2);
+    border: 0.5px solid transparent;
+    display: flex; flex-direction: column; gap: 2px; min-width: 130px;
+  }
+  .corridor-tab:hover { background: var(--card); border-color: var(--line); }
+  .corridor-tab.active {
+    background: var(--card); border-color: var(--line-2);
+    color: var(--ink); font-weight: 500;
+  }
+  .corridor-flag { font-size: 14px; }
+  .corridor-name { font-size: 13px; }
+  .corridor-vol { font-size: 10px; color: var(--ink-3); font-weight: 400; }
+
+  .amount-row {
+    display: flex; gap: 12px; align-items: center; margin-bottom: 20px;
+    padding: 12px 16px; background: var(--card); border-radius: 8px;
+    border: 0.5px solid var(--line);
+  }
+  .amount-label { font-size: 12px; color: var(--ink-3); }
+  .amount-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+  .amount-chip {
+    padding: 4px 10px; border: 0.5px solid var(--line-2);
+    border-radius: 4px; font-size: 12px; cursor: pointer;
+    background: transparent; color: var(--ink-2);
+  }
+  .amount-chip:hover { background: var(--bg); }
+  .amount-chip.active {
+    background: var(--ink); color: white; border-color: var(--ink);
+  }
+
+  .metrics {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 8px; margin-bottom: 20px;
+  }
+  .metric {
+    background: var(--card); padding: 12px 14px;
+    border-radius: 8px; border: 0.5px solid var(--line);
+  }
+  .metric-label { font-size: 11px; color: var(--ink-3); margin-bottom: 4px; }
+  .metric-value { font-size: 18px; font-weight: 500; }
+  .metric-sub { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+  .fx-panel {
+    background: var(--card); border: 0.5px solid var(--line);
+    border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .fx-title { font-size: 12px; color: var(--ink-3); margin-bottom: 4px; }
+  .fx-rates { display: flex; gap: 20px; font-size: 12px; }
+  .fx-rate strong { font-weight: 500; }
+  .fx-gap {
+    padding: 3px 10px; background: var(--accent-bg); color: var(--accent);
+    border-radius: 999px; font-size: 11px; font-weight: 500;
+  }
+
+  .filters { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filter-chip {
+    padding: 5px 12px; border: 0.5px solid var(--line-2);
+    border-radius: 999px; font-size: 12px; cursor: pointer;
+    background: var(--card); color: var(--ink-2);
+  }
+  .filter-chip:hover { background: var(--bg); }
+  .filter-chip.active {
+    background: var(--accent-bg); color: var(--accent);
+    border-color: var(--accent-border);
+  }
+
+  .category { margin-bottom: 20px; }
+  .category-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 8px 0; margin-bottom: 6px;
+  }
+  .category-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .category-meta { font-size: 11px; color: var(--ink-3); }
+
+  .method {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 100px 90px 70px 70px;
+    gap: 12px; padding: 10px 14px; margin-bottom: 4px;
+    background: var(--card); border: 0.5px solid var(--line);
+    border-radius: 6px; align-items: center; font-size: 13px;
+  }
+  .method.best {
+    border-color: var(--success-border);
+    background: var(--success-bg);
+  }
+  .method.gap {
+    border-left: 3px solid var(--accent);
+  }
+  .method-provider {
+    font-weight: 500; color: var(--ink);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    min-width: 0;
+  }
+  .method-provider-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .method-route { font-size: 11px; color: var(--ink-3); font-weight: 400; margin-top: 2px; }
+  .method-time { font-size: 12px; color: var(--ink-2); text-align: right; }
+  .method-fee { font-size: 13px; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+  .method-pct { font-size: 12px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+  .method-recipient { font-size: 12px; color: var(--success); text-align: right; font-variant-numeric: tabular-nums; }
+
+  .tag {
+    font-size: 9px; padding: 2px 6px; border-radius: 3px;
+    text-transform: uppercase; letter-spacing: 0.4px; font-weight: 500;
+    white-space: nowrap;
+  }
+  .tag-gap { background: var(--accent-bg); color: var(--accent); }
+  .tag-best { background: var(--success-bg); color: var(--success); }
+  .method-note {
+    font-size: 11px; color: var(--warn); background: var(--warn-bg);
+    padding: 6px 10px; margin-top: 4px; border-radius: 4px;
+    grid-column: 1 / -1;
+  }
+
+  .corridor-context {
+    background: var(--accent-bg); border: 0.5px solid var(--accent-border);
+    color: var(--accent); padding: 10px 14px; border-radius: 8px;
+    font-size: 12px; margin-bottom: 20px; line-height: 1.6;
+  }
+
+  footer {
+    margin-top: 40px; padding-top: 20px;
+    border-top: 0.5px solid var(--line);
+    font-size: 11px; color: var(--ink-3); line-height: 1.6;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 12px; }
+  .footer-heading { font-size: 11px; color: var(--ink); font-weight: 500; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  @media (max-width: 640px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .method {
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+    .method-time, .method-recipient { display: none; }
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-title">Money Map · EM Extension</span>
+      <span class="brand-sub">v0.1 · prototype</span>
+    </div>
+    <h1>Corridor rate transparency for emerging markets</h1>
+    <p class="lede">An open extension of the <a href="https://mit-dci.github.io/payments-dashboard/" style="color: var(--accent);">MIT DCI Money Map</a> for corridors, methods, and rails where operator-side ground truth changes the picture — mobile-money receive, EM-native remittance providers, stablecoin off-ramps, and P2P channels.</p>
+    <div class="attrib">
+      <span class="attrib-tag">Built by <a href="https://whoisbob.co" target="_blank" rel="noopener">Bernard O'bien</a> · Cambio</span>
+      <span>Last updated: <span id="last-updated">—</span></span>
+      <span>·</span>
+      <a href="https://github.com/bernardobien/money-map-em" target="_blank" rel="noopener">Source on GitHub</a>
+    </div>
+  </header>
+
+  <div class="callout">
+    <strong>Prototype note.</strong> The current DCI Money Map covers 10 US-originating corridors and shows Nigeria's best fee as 0.00% (data unavailability rendered as zero). This extension adds four corridors, ten+ methods per corridor including mobile-money and P2P rails, and explicit parallel-market FX benchmarking. Rates reflect published fee schedules and typical off-ramp spreads observed in live corridors — see the <a href="#methodology" style="color: var(--warn);">methodology note</a>.
+  </div>
+
+  <nav class="corridors" id="corridor-tabs"></nav>
+
+  <div class="corridor-context" id="corridor-context"></div>
+
+  <div class="fx-panel" id="fx-panel"></div>
+
+  <div class="amount-row">
+    <span class="amount-label">Sending</span>
+    <div class="amount-chips" id="amount-chips"></div>
+  </div>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="filters" id="filters"></div>
+
+  <div id="methods-list"></div>
+
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-heading">Purpose</div>
+        An open, extensible prototype extending the DCI Money Map to corridors and methods where emerging-market retail users actually transact. Built to inform the September 9 DCI Global talk and as an input into potential collaboration with MIT DCI's Payments Dashboard project.
+      </div>
+      <div id="methodology">
+        <div class="footer-heading">Methodology</div>
+        Rates are August 2026 approximations from published provider schedules, off-ramp spreads, and Cambio corridor observations. FX benchmarks use parallel-market rates where a meaningful gap exists (NGN, ARS). Not live quotes — see <a href="https://github.com/bernardobien/money-map-em#roadmap" target="_blank" rel="noopener">roadmap</a> for planned live-API integration.
+      </div>
+    </div>
+    <div style="padding-top: 12px; border-top: 0.5px solid var(--line); color: var(--ink-3);">
+      Data: <code style="font-family: var(--font-mono); font-size: 10px;">data.json</code> — updated daily. Corrections, additional methods, or corridor requests: <a href="mailto:obien@mit.edu">obien@mit.edu</a> or open an issue on GitHub.
+    </div>
+  </footer>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
