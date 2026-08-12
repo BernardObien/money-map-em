@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "0.3.0",
+    "version": "0.4.0",
     "last_updated": "2026-08-12",
     "rate_timestamp": "Aug 12 2026 · 13:00 EST",
     "fx_source": "CoinGecko (mid-market) + provider quotes",
@@ -82,5 +82,36 @@
         { "name": "Citi Global Transfer", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "3–5 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 30.00, "fx_spread_pct": 5.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 33.00, "range_high": 38.00, "breakdown_note": "Settled at the official rate; recipient loses ~10.7% vs the blue-dollar market on top of the fee." }
       ]
     }
-  ]
+  ],
+  "dci": {
+    "name": "MIT DCI Money Map",
+    "url": "https://mit-dci.github.io/payments-dashboard/",
+    "as_of": "Aug 2026",
+    "corridors": [
+      { "code": "US-MX", "label": "US → Mexico", "in_extension": false },
+      { "code": "US-NG", "label": "US → Nigeria", "in_extension": true },
+      { "code": "US-IN", "label": "US → India", "in_extension": false },
+      { "code": "US-PH", "label": "US → Philippines", "in_extension": false },
+      { "code": "US-ID", "label": "US → Indonesia", "in_extension": false },
+      { "code": "US-BR", "label": "US → Brazil", "in_extension": false },
+      { "code": "US-TR", "label": "US → Turkey", "in_extension": false }
+    ],
+    "shared_corridor": {
+      "id": "us-ng",
+      "label": "US → Nigeria",
+      "dci_methods": [
+        { "name": "Wells Fargo", "category": "Traditional banking", "total_pct": 7.5, "detail": "$25 send + ~5% FX spread", "speed": "2–5 days" },
+        { "name": "Chase", "category": "Traditional banking", "total_pct": 9.0, "detail": "$40 send + ~5% FX spread", "speed": "1–3 days" },
+        { "name": "Bank of America", "category": "Traditional banking", "total_pct": 9.5, "detail": "$45 send + ~5% FX spread", "speed": "1–3 days" },
+        { "name": "USDC (network only)", "category": "Stablecoin", "total_pct": 0.0, "detail": "Modeled on-chain only — 0% FX loss, ~$0.02 network — the NGN off-ramp is omitted", "speed": "minutes" }
+      ]
+    },
+    "gaps": [
+      "Nigeria-specific coverage is 3 bank wires plus generic global methods — no EM-native providers (LemFi, Sendwave, NALA, Grey, ChipperCash).",
+      "Stablecoins are modeled network-only (USDC: 0% FX loss, ~$0.02 network), so crypto reads as near-free and Nigeria's best fee shows ~0% — the real NGN off-ramp spread is omitted.",
+      "No mobile-money last mile (OPay / PalmPay / M-Pesa) and no P2P (Binance P2P) — the channels that set the real street rate in these corridors.",
+      "FX uses a generic benchmark; the crypto / parallel rate (~₦1,528) runs ~11.9% above the official window (~₦1,365), which changes the true best-rate ranking.",
+      "All corridors are US-originating — no UK→Nigeria, no US→Kenya (M-Pesa), no intra-EM routes where stablecoins have their strongest use case."
+    ]
+  }
 }

@@ -218,8 +218,43 @@
   footer a { color: var(--red); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
 
+  /* Nav interactivity */
+  .navtab[data-tab] { cursor: pointer; }
+  .navtab[data-tab]:hover { color: var(--ink); }
+
+  /* vs DCI comparison view */
+  .dci { background: var(--card); border: 0.5px solid var(--line); border-radius: 10px; padding: 24px; }
+  .dci h2 { font-size: 19px; font-weight: 800; margin: 0 0 4px; }
+  .dci .lede { font-size: 13px; color: var(--ink-2); margin: 0 0 8px; max-width: 780px; line-height: 1.6; }
+  .dci .lede a { color: var(--red); text-decoration: none; }
+  .dci-sec { margin-top: 28px; }
+  .dci-sec-h { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; color: var(--ink-3); text-transform: uppercase; margin-bottom: 12px; }
+  .cov { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cov th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink-3); text-transform: uppercase; padding: 8px 10px; border-bottom: 0.5px solid var(--line); }
+  .cov th.c, .cov td.c { text-align: center; }
+  .cov td { padding: 10px; border-bottom: 0.5px solid var(--line); vertical-align: middle; }
+  .cov .yes { color: var(--red); font-weight: 800; }
+  .cov .no { color: var(--ink-3); }
+  .cov .note { color: var(--ink-2); font-size: 12px; }
+  .cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 0.5px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .cmp-col { padding: 16px 18px; }
+  .cmp-col:first-child { border-right: 0.5px solid var(--line); background: var(--panel); }
+  .cmp-h { font-size: 13px; font-weight: 800; margin-bottom: 2px; }
+  .cmp-sub { font-size: 11px; color: var(--ink-3); margin-bottom: 12px; }
+  .cmp-item { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 12.5px; padding: 7px 0; border-bottom: 0.5px solid var(--line); }
+  .cmp-item:last-child { border-bottom: none; }
+  .cmp-item .nm { font-weight: 600; }
+  .cmp-item .cat { color: var(--ink-3); font-size: 11px; display: block; font-weight: 400; }
+  .cmp-item .val { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+  .flags { list-style: none; padding: 0; margin: 0; }
+  .flags li { position: relative; padding: 9px 0 9px 24px; font-size: 13px; color: var(--ink-2); line-height: 1.55; border-bottom: 0.5px solid var(--line); }
+  .flags li:last-child { border-bottom: none; }
+  .flags li::before { content: "!"; position: absolute; left: 0; top: 9px; width: 15px; height: 15px; border-radius: 50%; background: var(--red-bg); color: var(--red); font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+
   @media (max-width: 900px) {
     .controlbar { grid-template-columns: 1fr; }
+    .cmp { grid-template-columns: 1fr; }
+    .cmp-col:first-child { border-right: none; border-bottom: 0.5px solid var(--line); }
     .ctl { border-right: none; border-bottom: 0.5px solid var(--line); }
     .cardgrid { grid-template-columns: repeat(2, 1fr); }
     .mcard { border-bottom: 0.5px solid var(--line); padding-bottom: 12px; }
@@ -240,7 +275,8 @@
     <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
       <span class="wordmark">MONEY MAP</span>
       <nav class="navtabs">
-        <span class="navtab active">Corridors</span>
+        <span class="navtab active" data-tab="corridors">Corridors</span>
+        <span class="navtab" data-tab="dci">vs DCI</span>
         <span class="navtab disabled">Gas fees</span>
         <span class="navtab disabled">Stablecoin use</span>
       </nav>
@@ -248,6 +284,7 @@
     <div class="topbar-meta" id="topbar-meta"></div>
   </div>
 
+  <div id="corridors-view">
   <div class="controlbar">
     <div class="ctl">
       <div class="ctl-label">Route</div>
@@ -320,6 +357,9 @@
   </div>
 
   <div id="results"></div>
+  </div><!-- /corridors-view -->
+
+  <div id="dci-view" style="display:none;"></div>
 
   <footer id="footer"></footer>
 </div>

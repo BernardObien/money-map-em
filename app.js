@@ -26,6 +26,7 @@
     amount: 100,
     sendAs: 'usd',      // 'usd' | 'crypto'
     receiveAs: 'local', // 'local' | 'crypto'
+    tab: 'corridors',   // 'corridors' | 'dci'
     speed: 'any',
     send: 'all',
     receive: 'all',
@@ -157,6 +158,9 @@
       renderAll();
     };
 
+    // nav tabs (Corridors / vs DCI)
+    document.querySelectorAll('.navtab[data-tab]').forEach(t => t.onclick = () => { state.tab = t.dataset.tab; renderAll(); });
+
     // topbar meta + footer
     document.getElementById('topbar-meta').innerHTML =
       `Rates as of ${data.meta.rate_timestamp}<br>${data.meta.fx_source}`;
@@ -195,6 +199,13 @@
 
   // ---- dynamic render -----------------------------------------------------
   function renderAll() {
+    // tab switch: Corridors vs the "vs DCI" comparison
+    document.querySelectorAll('.navtab[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === state.tab));
+    const isDci = state.tab === 'dci';
+    document.getElementById('corridors-view').style.display = isDci ? 'none' : '';
+    document.getElementById('dci-view').style.display = isDci ? '' : 'none';
+    if (isDci) { renderDci(); return; }
+
     // active classes on controls
     document.querySelectorAll('.preset').forEach(b => b.classList.toggle('active', Number(b.dataset.v) === state.amount));
     document.querySelectorAll('#speed-chips .chip').forEach(ch => ch.classList.toggle('on', ch.dataset.v === state.speed));
@@ -342,6 +353,54 @@
     }
   }
 
+  // ---- "vs DCI" comparison view ------------------------------------------
+  function renderDci() {
+    const dci = data.dci;
+    const senderShort = s => ({ US: 'US', GB: 'UK' }[s] || s);
+    const extLabel = c => `${senderShort(c.sender)} → ${c.recipient_name}`;
+    const dciCodeOf = c => `${c.sender}-${c.recipient}`;
+    const dciCodes = dci.corridors.map(c => c.code);
+    const total100 = m => { const b = m.fee_breakdown; return b.send_fee_pct + b.fx_spread_pct + b.receive_fee_pct + b.send_fee_flat_usd + b.network_fee_usd; };
+
+    // coverage matrix (DCI corridors, then extension-only corridors)
+    const extNotes = { 'US-KE': 'M-Pesa corridor DCI omits entirely', 'GB-NG': 'UK origin — DCI is US-only', 'US-AR': 'Blue-dollar FX gap DCI does not surface' };
+    let rows = dci.corridors.map(c => ({
+      label: c.label, onDci: true, inExt: c.in_extension,
+      note: c.in_extension ? 'Shared — method comparison below' : 'On DCI · not yet in this extension'
+    }));
+    data.corridors.forEach(c => {
+      const code = dciCodeOf(c);
+      if (!dciCodes.includes(code)) rows.push({ label: extLabel(c), onDci: false, inExt: true, note: extNotes[code] || 'Added by this extension' });
+    });
+    const mark = v => v ? '<span class="yes">✓</span>' : '<span class="no">—</span>';
+    const covRows = rows.map(r =>
+      `<tr><td>${r.label}</td><td class="c">${mark(r.onDci)}</td><td class="c">${mark(r.inExt)}</td><td class="note">${r.note}</td></tr>`).join('');
+
+    // US → Nigeria method comparison
+    const ng = data.corridors.find(c => c.id === dci.shared_corridor.id);
+    const added = ng.methods.filter(m => !m.on_money_map);
+    const dciItems = dci.shared_corridor.dci_methods.map(m =>
+      `<div class="cmp-item"><span class="nm">${m.name}<span class="cat">${m.category} · ${m.speed}</span></span><span class="val">${m.total_pct.toFixed(2)}%</span></div>`).join('');
+    const addItems = added.map(m =>
+      `<div class="cmp-item"><span class="nm">${m.name}<span class="cat">${m.subtitle}</span></span><span class="val">${total100(m).toFixed(2)}%</span></div>`).join('');
+
+    const flags = dci.gaps.map(g => `<li>${g}</li>`).join('');
+
+    document.getElementById('dci-view').innerHTML =
+      `<div class="dci">` +
+        `<h2>How this extends the ${dci.name}</h2>` +
+        `<p class="lede">The <a href="${dci.url}" target="_blank" rel="noopener">MIT DCI Money Map</a> (${dci.as_of}) covers ${dci.corridors.length} US-originating corridors. This prototype keeps the same idea and fills the emerging-market gaps: corridors DCI doesn't reach, the last-mile methods it omits, and the off-ramp costs its stablecoin model leaves out. The corridor tool is unchanged — switch back with the <strong>Corridors</strong> tab.</p>` +
+        `<div class="dci-sec"><div class="dci-sec-h">Corridor coverage</div>` +
+          `<table class="cov"><thead><tr><th>Corridor</th><th class="c">On DCI</th><th class="c">This extension</th><th>Note</th></tr></thead><tbody>${covRows}</tbody></table></div>` +
+        `<div class="dci-sec"><div class="dci-sec-h">US → Nigeria · the one corridor both cover</div>` +
+          `<div class="cmp">` +
+            `<div class="cmp-col"><div class="cmp-h">On the DCI Money Map</div><div class="cmp-sub">Nigeria-specific: 3 bank wires + a network-only stablecoin · cost on $1,000 / $100</div>${dciItems}</div>` +
+            `<div class="cmp-col"><div class="cmp-h">Added by this extension</div><div class="cmp-sub">${added.length} EM-native methods missing from DCI · total cost on $100</div>${addItems}</div>` +
+          `</div></div>` +
+        `<div class="dci-sec"><div class="dci-sec-h">Where the DCI numbers mislead</div><ul class="flags">${flags}</ul></div>` +
+      `</div>`;
+  }
+
   // ---- deep-linking (shareable presets, e.g. ?route=us-ng&view=cards) -----
   function applyParams() {
     const q = new URLSearchParams(location.search);
@@ -365,6 +424,7 @@
     if (q.get('sendAs')) state.sendAs = q.get('sendAs');
     if (q.get('receiveAs')) state.receiveAs = q.get('receiveAs');
     if (q.get('expand')) state.expanded[q.get('expand')] = true;
+    if (q.get('tab')) state.tab = q.get('tab');
   }
 
   // ---- boot ---------------------------------------------------------------

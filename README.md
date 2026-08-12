@@ -4,6 +4,16 @@ An open extension of the [MIT DCI Money Map](https://mit-dci.github.io/payments-
 
 **Live prototype:** https://bernardobien.github.io/money-map-em/
 
+## v0.4 changelog
+
+Added a **"vs DCI"** tab that positions the tool explicitly as an extension of the MIT DCI Money Map, built from DCI's own live data (extracted Aug 2026):
+
+- **Corridor coverage matrix** — the 7 US-originating corridors DCI covers vs the corridors this extension adds (US→Kenya, UK→Nigeria, US→Argentina); US→Nigeria is the one both cover.
+- **US→Nigeria method comparison** — DCI's Nigeria-specific coverage (3 bank wires at 7.5–9.5% + a network-only stablecoin) beside the EM-native methods this extension adds (USDC 0.31%, USDT 0.55%, LemFi 0.99%, Sendwave, Grey).
+- **"Where the DCI numbers mislead"** — the concrete data-quality gaps: why Nigeria's best fee reads ~0% (stablecoins modeled network-only, so the NGN off-ramp is omitted), the missing EM-native / mobile-money / P2P channels, and the ~11.9% parallel-vs-official FX gap.
+
+The corridor tool is unchanged; the comparison is a separate tab.
+
 ## v0.3 changelog
 
 Full redesign following external design feedback. The reviewer built a wireframe prototype of the target UX; their proposed flow forms the basis of this version.
