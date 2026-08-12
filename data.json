@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "0.5.0",
+    "version": "0.5.1",
     "last_updated": "2026-08-12",
     "rate_timestamp": "Aug 12 2026 · 13:00 EST",
     "fx_source": "CoinGecko (mid-market) + provider quotes",
@@ -19,7 +19,10 @@
     "USD_BRL": { "mid": 5.42, "source": "CoinGecko", "symbol": "R$" },
     "USD_TRY": { "mid": 40.30, "source": "CoinGecko (crypto-market)", "symbol": "₺" },
     "GBP_INR": { "mid": 108.50, "source": "CoinGecko", "symbol": "₹" },
-    "CAD_INR": { "mid": 62.10, "source": "CoinGecko", "symbol": "₹" }
+    "CAD_INR": { "mid": 62.10, "source": "CoinGecko", "symbol": "₹" },
+    "USD_IDR": { "mid": 16350.00, "source": "CoinGecko", "symbol": "Rp" },
+    "USD_GTQ": { "mid": 7.72, "source": "CoinGecko", "symbol": "Q" },
+    "USD_DOP": { "mid": 61.50, "source": "CoinGecko", "symbol": "RD$" }
   },
   "fx_benchmarks": {
     "NGN": { "official": 1365, "parallel": 1528, "note": "CoinGecko crypto-market rate (₦1,528) sits ~11.9% above the official CBN window (₦1,365) — the parallel premium stablecoin routes actually settle at." },
@@ -181,6 +184,47 @@
         { "name": "Remitly", "badge": "wallet", "subtitle": "Debit card in · bank deposit out", "send_method": "debit_card", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~10 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.99, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.80, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.50, "range_high": 2.10 },
         { "name": "Bank wire (SWIFT)", "badge": "bank", "subtitle": "Bank in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "2–4 days", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 20.00, "fx_spread_pct": 2.50, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 44.00, "range_high": 50.00, "breakdown_note": "Flat correspondent-bank fee." }
       ]
+    },
+    {
+      "id": "us-id",
+      "sender": "US", "sender_name": "United States", "sender_currency": "USD", "sender_flag": "🇺🇸",
+      "recipient": "ID", "recipient_name": "Indonesia", "recipient_currency": "IDR", "recipient_flag": "🇮🇩",
+      "fx_pair": "USD_IDR",
+      "context": "Southeast Asia corridor with an e-wallet last mile (GoPay / OVO / DANA). DCI's cheapest bank here is a Wells Fargo wire at ~8%; stablecoin → e-wallet undercuts it heavily.",
+      "methods": [
+        { "name": "USDC", "badge": "crypto", "subtitle": "Base network · off-ramp to e-wallet", "send_method": "crypto", "receive_method": "mobile_wallet", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.35, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.30, "range_high": 0.55 },
+        { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · off-ramp to e-wallet", "send_method": "crypto", "receive_method": "mobile_wallet", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.40, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.50, "range_high": 1.10 },
+        { "name": "Wise", "badge": "wallet", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "same_day", "speed_detail": "hours", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.50, "send_fee_flat_usd": 0.00, "fx_spread_pct": 1.20, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.60, "range_high": 2.00 },
+        { "name": "Remitly", "badge": "wallet", "subtitle": "Debit card in · e-wallet out", "send_method": "debit_card", "receive_method": "mobile_wallet", "speed_tier": "instant", "speed_detail": "~5 min", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 1.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 1.50, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 2.40, "range_high": 3.00 },
+        { "name": "Wells Fargo wire", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "2–4 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 30.00, "fx_spread_pct": 5.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 75.00, "range_high": 85.00, "breakdown_note": "DCI baseline: $80 on a $1,000 transfer (8%). Flat $30 fee + ~5% FX spread." }
+      ]
+    },
+    {
+      "id": "us-gt",
+      "sender": "US", "sender_name": "United States", "sender_currency": "USD", "sender_flag": "🇺🇸",
+      "recipient": "GT", "recipient_name": "Guatemala", "recipient_currency": "GTQ", "recipient_flag": "🇬🇹",
+      "fx_pair": "USD_GTQ",
+      "context": "DCI's one crypto-only corridor: it lists only network-only USDC/BTC and models them without the off-ramp, so Guatemala reads as free. Cash pickup and Bitso off-ramps are the real last mile.",
+      "methods": [
+        { "name": "USDC", "badge": "crypto", "subtitle": "Base network · Bitso off-ramp", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.30, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.25, "range_high": 0.45, "breakdown_note": "DCI lists USDC here as network-only (~$0.02, 0% FX) — this prices the real Bitso off-ramp DCI omits." },
+        { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · Bitso off-ramp", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.40, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.45, "range_high": 1.05 },
+        { "name": "Remitly", "badge": "wallet", "subtitle": "Debit card in · bank deposit out", "send_method": "debit_card", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~10 min", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 1.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 1.50, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 2.30, "range_high": 2.90 },
+        { "name": "Western Union", "badge": "wallet", "subtitle": "Debit card in · cash pickup", "send_method": "debit_card", "receive_method": "cash_pickup", "speed_tier": "instant", "speed_detail": "~15 min", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 2.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 2.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 3.50, "range_high": 4.50 },
+        { "name": "Bank wire (SWIFT)", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "2–4 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 30.00, "fx_spread_pct": 3.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 58.00, "range_high": 66.00, "breakdown_note": "DCI lists no Guatemala bank rail — this is the real correspondent-bank cost it omits." }
+      ]
+    },
+    {
+      "id": "us-do",
+      "sender": "US", "sender_name": "United States", "sender_currency": "USD", "sender_flag": "🇺🇸",
+      "recipient": "DO", "recipient_name": "Dominican Rep.", "recipient_currency": "DOP", "recipient_flag": "🇩🇴",
+      "fx_pair": "USD_DOP",
+      "context": "Caribbean corridor, heavily cash-pickup and remittance-dependent. DCI's cheapest is a Wells Fargo wire (~4%); a stablecoin off-ramp undercuts it.",
+      "methods": [
+        { "name": "USDC", "badge": "crypto", "subtitle": "Base network · off-ramp to bank", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.35, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.30, "range_high": 0.55 },
+        { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · off-ramp to bank", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.40, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.50, "range_high": 1.10 },
+        { "name": "Remitly", "badge": "wallet", "subtitle": "Debit card in · cash pickup", "send_method": "debit_card", "receive_method": "cash_pickup", "speed_tier": "instant", "speed_detail": "~10 min", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 1.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 1.50, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 2.30, "range_high": 2.90 },
+        { "name": "Wells Fargo wire", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "2–4 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 20.00, "fx_spread_pct": 2.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 38.00, "range_high": 44.00, "breakdown_note": "DCI baseline: $40 on a $1,000 transfer (4%). Flat $20 fee + ~2% FX spread." }
+      ]
     }
   ],
   "dci": {
@@ -192,11 +236,11 @@
       { "code": "US-NG", "label": "US → Nigeria", "in_extension": true },
       { "code": "US-IN", "label": "US → India", "in_extension": true },
       { "code": "US-PH", "label": "US → Philippines", "in_extension": true },
-      { "code": "US-ID", "label": "US → Indonesia", "in_extension": false },
+      { "code": "US-ID", "label": "US → Indonesia", "in_extension": true },
       { "code": "US-BR", "label": "US → Brazil", "in_extension": true },
       { "code": "US-TR", "label": "US → Turkey", "in_extension": true },
-      { "code": "US-GT", "label": "US → Guatemala", "in_extension": false },
-      { "code": "US-DO", "label": "US → Dominican Rep.", "in_extension": false },
+      { "code": "US-GT", "label": "US → Guatemala", "in_extension": true },
+      { "code": "US-DO", "label": "US → Dominican Rep.", "in_extension": true },
       { "code": "US-AR", "label": "US → Argentina", "in_extension": true }
     ],
     "corridor_costs": [

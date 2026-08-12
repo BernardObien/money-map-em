@@ -9,7 +9,7 @@ An open extension of the [MIT DCI Money Map](https://mit-dci.github.io/payments-
 Deepened the extension and the DCI comparison, grounded in an independent study.
 
 - **Cost spectrum** — a money-map graph (less cluttered than DCI's): each method is a dot positioned by total cost, coloured by the thesis — red = added by this extension (missing from DCI), ink = on DCI. The cheap end is red; bank wires sit far right.
-- **Corridors expanded** — senders **US / UK / Canada**; receivers across the DCI set (Mexico, India, Philippines, Brazil, Turkey added on top of Nigeria, Kenya, Argentina), plus UK→India and Canada→India.
+- **Corridors expanded** — senders **US / UK / Canada**; the full DCI receiver set is now live (Mexico, India, Philippines, Brazil, Turkey, Indonesia, Guatemala, Dominican Rep., Argentina, Nigeria) plus Kenya, UK→Nigeria, UK→India and Canada→India. Every one of DCI's 10 corridors is now covered. Guatemala is DCI's one crypto-only corridor — modeled network-only, so it reads as free; the extension prices the real off-ramp.
 - **vs-DCI deepened to all 10 DCI corridors** using DCI's own extracted numbers: a corridor-by-corridor "cheapest rail" table (Mexico & Nigeria ~24× cheaper, Argentina ~19×, Philippines ~5×, Brazil ~4×), a corrected coverage matrix (DCI does cover Argentina, Guatemala, Dominican Rep.), and Guatemala flagged as DCI's one crypto-only corridor.
 - **Study woven in for credence** — the *Dollar-Stable Wallets · Hedging Volatility for EM Remittance Households* thesis (value-retention vs transmission) and per-country context (Nigeria −70% Naira, Argentina blue-dollar, Turkey Lira-as-savings) drawn from the independent study.
 

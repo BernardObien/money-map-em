@@ -9,7 +9,7 @@
   }
 
   // ---- constants ----------------------------------------------------------
-  const SYM = { USD: '$', GBP: '£', CAD: '$', NGN: '₦', KES: 'KSh ', ARS: '$', MXN: '$', INR: '₹', PHP: '₱', BRL: 'R$', TRY: '₺' };
+  const SYM = { USD: '$', GBP: '£', CAD: '$', NGN: '₦', KES: 'KSh ', ARS: '$', MXN: '$', INR: '₹', PHP: '₱', BRL: 'R$', TRY: '₺', IDR: 'Rp', GTQ: 'Q', DOP: 'RD$' };
   const SPEED_LABEL = { instant: 'Instant', same_day: 'Same day', lt_3_days: '<3 days' };
   const SPEED_RANK = { instant: 0, same_day: 1, lt_3_days: 2 };
   const BADGE_LABEL = { crypto: 'Crypto', wallet: 'Wallet', bank: 'Bank' };
