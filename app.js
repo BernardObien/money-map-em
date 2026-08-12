@@ -9,7 +9,7 @@
   }
 
   // ---- constants ----------------------------------------------------------
-  const SYM = { USD: '$', GBP: '£', NGN: '₦', KES: 'KSh ', ARS: '$' };
+  const SYM = { USD: '$', GBP: '£', CAD: '$', NGN: '₦', KES: 'KSh ', ARS: '$', MXN: '$', INR: '₹', PHP: '₱', BRL: 'R$', TRY: '₺' };
   const SPEED_LABEL = { instant: 'Instant', same_day: 'Same day', lt_3_days: '<3 days' };
   const SPEED_RANK = { instant: 0, same_day: 1, lt_3_days: 2 };
   const BADGE_LABEL = { crypto: 'Crypto', wallet: 'Wallet', bank: 'Bank' };
@@ -218,7 +218,43 @@
     document.getElementById('filter-count').textContent = fc ? `${fc} filter${fc > 1 ? 's' : ''}` : '';
 
     renderHero();
+    renderSpectrum();
     renderResults();
+  }
+
+  // Cost spectrum — one dot per method, positioned by total cost (best value →
+  // expensive). Colour carries the thesis: red = added by this extension
+  // (missing from DCI), ink = already on DCI. Square-root x so the cheap cluster
+  // stays legible while bank wires sit out at the expensive end.
+  function renderSpectrum() {
+    const el = document.getElementById('spectrum');
+    const list = baseMethods().map(m => ({ m, c: compute(m) }));
+    if (list.length < 2) { el.innerHTML = ''; return; }
+    const pctOf = x => (state.amount > 0 ? x.c.total / state.amount * 100 : 0);
+    const maxPct = Math.max(...list.map(pctOf), 0.5);
+    const sq = v => Math.sqrt(Math.max(v, 0) / maxPct);
+    const W = 1000, padL = 16, padR = 16, y = 52, trackW = W - padL - padR;
+    const sorted = [...list].sort((a, b) => a.c.total - b.c.total);
+    const cheapest = sorted[0], priciest = sorted[sorted.length - 1];
+    const dots = list.map(x => {
+      const cx = padL + sq(pctOf(x)) * trackW, missing = !x.m.on_money_map, isCh = x === cheapest;
+      return `<circle cx="${cx.toFixed(1)}" cy="${y}" r="${isCh ? 7 : 5}" fill="${missing ? 'var(--red)' : 'var(--ink-3)'}" fill-opacity="${missing ? 1 : 0.5}" stroke="#fff" stroke-width="1.5"><title>${x.m.name} · ${pctOf(x).toFixed(2)}%</title></circle>`;
+    }).join('');
+    const lbl = (x, anchor, dx) => {
+      const cx = padL + sq(pctOf(x)) * trackW;
+      return `<text x="${(cx + dx).toFixed(1)}" y="28" text-anchor="${anchor}" class="spec-lbl">${x.m.name}</text>` +
+        `<text x="${(cx + dx).toFixed(1)}" y="42" text-anchor="${anchor}" class="spec-lbl-pct">${pctOf(x).toFixed(2)}%</text>`;
+    };
+    el.innerHTML =
+      `<div class="spectrum-head">Cost spectrum · ${list.length} methods<span class="spectrum-sub">position ≈ total cost · cheapest → most expensive</span></div>` +
+      `<svg viewBox="0 0 ${W} 92" preserveAspectRatio="none" class="spectrum-svg" role="img" aria-label="Cost spectrum of methods, cheapest to most expensive">` +
+        `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="var(--line-2)" stroke-width="1.5"/>` +
+        lbl(cheapest, 'start', -4) + lbl(priciest, 'end', 4) +
+        dots +
+        `<text x="${padL}" y="82" class="spec-axis">Best value</text>` +
+        `<text x="${W - padR}" y="82" text-anchor="end" class="spec-axis">Most expensive</text>` +
+      `</svg>` +
+      `<div class="spectrum-legend"><span><i class="sw sw-red"></i> Added by this extension (missing from DCI)</span><span><i class="sw sw-ink"></i> On DCI</span></div>`;
   }
 
   function renderHero() {
@@ -355,49 +391,63 @@
 
   // ---- "vs DCI" comparison view ------------------------------------------
   function renderDci() {
-    const dci = data.dci;
-    const senderShort = s => ({ US: 'US', GB: 'UK' }[s] || s);
+    const dci = data.dci, study = data.study;
+    const total100 = m => { const b = m.fee_breakdown; return b.send_fee_pct + b.fx_spread_pct + b.receive_fee_pct + b.send_fee_flat_usd + b.network_fee_usd; };
+    const senderShort = s => ({ US: 'US', GB: 'UK', CA: 'CA' }[s] || s);
     const extLabel = c => `${senderShort(c.sender)} → ${c.recipient_name}`;
     const dciCodeOf = c => `${c.sender}-${c.recipient}`;
     const dciCodes = dci.corridors.map(c => c.code);
-    const total100 = m => { const b = m.fee_breakdown; return b.send_fee_pct + b.fx_spread_pct + b.receive_fee_pct + b.send_fee_flat_usd + b.network_fee_usd; };
+    const extBest = code => {
+      const rec = code.split('-')[1];
+      const cor = data.corridors.find(c => c.sender === 'US' && c.recipient === rec);
+      if (!cor) return null;
+      let best = Infinity, name = '';
+      cor.methods.forEach(m => { const t = total100(m); if (t < best) { best = t; name = m.name; } });
+      return { pct: best, name };
+    };
 
-    // coverage matrix (DCI corridors, then extension-only corridors)
-    const extNotes = { 'US-KE': 'M-Pesa corridor DCI omits entirely', 'GB-NG': 'UK origin — DCI is US-only', 'US-AR': 'Blue-dollar FX gap DCI does not surface' };
-    let rows = dci.corridors.map(c => ({
-      label: c.label, onDci: true, inExt: c.in_extension,
-      note: c.in_extension ? 'Shared — method comparison below' : 'On DCI · not yet in this extension'
-    }));
-    data.corridors.forEach(c => {
-      const code = dciCodeOf(c);
-      if (!dciCodes.includes(code)) rows.push({ label: extLabel(c), onDci: false, inExt: true, note: extNotes[code] || 'Added by this extension' });
-    });
+    // study thesis
+    const why = study.why_points.map(p => `<div class="why-item"><span class="why-c">${p.country}</span> ${p.note}</div>`).join('');
+
+    // coverage matrix
+    const extNotes = { 'US-KE': 'M-Pesa corridor DCI omits entirely', 'GB-NG': 'UK origin — DCI is US-only', 'GB-IN': 'UK origin — DCI is US-only', 'CA-IN': 'Canada origin — DCI is US-only' };
+    let rows = dci.corridors.map(c => ({ label: c.label, onDci: true, inExt: c.in_extension, note: c.in_extension ? 'Shared — compared below' : 'On DCI · not yet in this extension' }));
+    data.corridors.forEach(c => { const code = dciCodeOf(c); if (!dciCodes.includes(code)) rows.push({ label: extLabel(c), onDci: false, inExt: true, note: extNotes[code] || 'Added by this extension' }); });
     const mark = v => v ? '<span class="yes">✓</span>' : '<span class="no">—</span>';
-    const covRows = rows.map(r =>
-      `<tr><td>${r.label}</td><td class="c">${mark(r.onDci)}</td><td class="c">${mark(r.inExt)}</td><td class="note">${r.note}</td></tr>`).join('');
+    const covRows = rows.map(r => `<tr><td>${r.label}</td><td class="c">${mark(r.onDci)}</td><td class="c">${mark(r.inExt)}</td><td class="note">${r.note}</td></tr>`).join('');
 
-    // US → Nigeria method comparison
+    // multi-corridor cost comparison
+    const costRows = [...dci.corridor_costs].sort((a, b) => (a.dci_pct == null ? 999 : a.dci_pct) - (b.dci_pct == null ? 999 : b.dci_pct)).map(cc => {
+      const label = (dci.corridors.find(x => x.code === cc.code) || {}).label || cc.code;
+      const dciCell = cc.dci_pct == null ? `<span class="muted">${cc.dci_label}</span>`
+        : cc.dci_pct === 0 ? `≈0.00% <span class="muted">${cc.dci_label}</span>`
+        : `${cc.dci_pct.toFixed(2)}% <span class="muted">${cc.dci_label}</span>`;
+      const eb = extBest(cc.code);
+      const extCell = eb ? `<span class="yes">${eb.pct.toFixed(2)}%</span> <span class="muted">${eb.name}</span>` : '<span class="no">—</span>';
+      let delta = '';
+      if (eb && cc.dci_pct) { const x = cc.dci_pct / eb.pct; if (x >= 1.5) delta = `${x.toFixed(0)}× cheaper`; }
+      return `<tr><td>${label}</td><td class="r">${dciCell}</td><td class="r">${extCell}</td><td class="r delta">${delta}</td></tr>`;
+    }).join('');
+
+    // shared corridor (US → Nigeria)
     const ng = data.corridors.find(c => c.id === dci.shared_corridor.id);
     const added = ng.methods.filter(m => !m.on_money_map);
-    const dciItems = dci.shared_corridor.dci_methods.map(m =>
-      `<div class="cmp-item"><span class="nm">${m.name}<span class="cat">${m.category} · ${m.speed}</span></span><span class="val">${m.total_pct.toFixed(2)}%</span></div>`).join('');
-    const addItems = added.map(m =>
-      `<div class="cmp-item"><span class="nm">${m.name}<span class="cat">${m.subtitle}</span></span><span class="val">${total100(m).toFixed(2)}%</span></div>`).join('');
+    const dciItems = dci.shared_corridor.dci_methods.map(m => `<div class="cmp-item"><span class="nm">${m.name}<span class="cat">${m.category} · ${m.speed}</span></span><span class="val">${m.total_pct.toFixed(2)}%</span></div>`).join('');
+    const addItems = added.map(m => `<div class="cmp-item"><span class="nm">${m.name}<span class="cat">${m.subtitle}</span></span><span class="val">${total100(m).toFixed(2)}%</span></div>`).join('');
 
     const flags = dci.gaps.map(g => `<li>${g}</li>`).join('');
 
     document.getElementById('dci-view').innerHTML =
       `<div class="dci">` +
+        `<div class="study-band"><div class="study-title">${study.title}</div><div class="study-thesis">${study.thesis}</div><div class="study-meta">${study.author} · ${study.period}</div></div>` +
         `<h2>How this extends the ${dci.name}</h2>` +
-        `<p class="lede">The <a href="${dci.url}" target="_blank" rel="noopener">MIT DCI Money Map</a> (${dci.as_of}) covers ${dci.corridors.length} US-originating corridors. This prototype keeps the same idea and fills the emerging-market gaps: corridors DCI doesn't reach, the last-mile methods it omits, and the off-ramp costs its stablecoin model leaves out. The corridor tool is unchanged — switch back with the <strong>Corridors</strong> tab.</p>` +
-        `<div class="dci-sec"><div class="dci-sec-h">Corridor coverage</div>` +
-          `<table class="cov"><thead><tr><th>Corridor</th><th class="c">On DCI</th><th class="c">This extension</th><th>Note</th></tr></thead><tbody>${covRows}</tbody></table></div>` +
-        `<div class="dci-sec"><div class="dci-sec-h">US → Nigeria · the one corridor both cover</div>` +
-          `<div class="cmp">` +
-            `<div class="cmp-col"><div class="cmp-h">On the DCI Money Map</div><div class="cmp-sub">Nigeria-specific: 3 bank wires + a network-only stablecoin · cost on $1,000 / $100</div>${dciItems}</div>` +
-            `<div class="cmp-col"><div class="cmp-h">Added by this extension</div><div class="cmp-sub">${added.length} EM-native methods missing from DCI · total cost on $100</div>${addItems}</div>` +
-          `</div></div>` +
+        `<p class="lede">The <a href="${dci.url}" target="_blank" rel="noopener">MIT DCI Money Map</a> (${dci.as_of}) covers ${dci.corridors.length} US-originating corridors. This prototype keeps the same idea and fills the emerging-market gaps: more sender countries, the last-mile methods DCI omits, and the off-ramp costs its stablecoin model leaves out. The corridor tool is unchanged — switch back with the <strong>Corridors</strong> tab.</p>` +
+        `<div class="dci-sec"><div class="dci-sec-h">Why dollar-stable — from the study</div><div class="why-wrap">${why}</div></div>` +
+        `<div class="dci-sec"><div class="dci-sec-h">Corridor coverage</div><table class="cov"><thead><tr><th>Corridor</th><th class="c">On DCI</th><th class="c">This extension</th><th>Note</th></tr></thead><tbody>${covRows}</tbody></table></div>` +
+        `<div class="dci-sec"><div class="dci-sec-h">Cheapest rail, corridor by corridor</div><div class="dci-sec-sub">DCI's corridor-specific bank baseline vs the cheapest method this extension surfaces (total cost on $100). The stablecoin rail DCI under-models is consistently cheaper.</div><table class="cov cost"><thead><tr><th>Corridor</th><th class="r">DCI baseline</th><th class="r">Extension best</th><th class="r"></th></tr></thead><tbody>${costRows}</tbody></table></div>` +
+        `<div class="dci-sec"><div class="dci-sec-h">US → Nigeria · the deepest shared corridor</div><div class="cmp"><div class="cmp-col"><div class="cmp-h">On the DCI Money Map</div><div class="cmp-sub">Nigeria-specific: 3 bank wires + a network-only stablecoin</div>${dciItems}</div><div class="cmp-col"><div class="cmp-h">Added by this extension</div><div class="cmp-sub">${added.length} EM-native methods missing from DCI · total cost on $100</div>${addItems}</div></div></div>` +
         `<div class="dci-sec"><div class="dci-sec-h">Where the DCI numbers mislead</div><ul class="flags">${flags}</ul></div>` +
+        `<div class="study-foot">${study.corridor_note}</div>` +
       `</div>`;
   }
 

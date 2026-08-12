@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "0.4.0",
+    "version": "0.5.0",
     "last_updated": "2026-08-12",
     "rate_timestamp": "Aug 12 2026 · 13:00 EST",
     "fx_source": "CoinGecko (mid-market) + provider quotes",
@@ -12,7 +12,14 @@
     "USD_NGN": { "mid": 1528.40, "source": "CoinGecko", "symbol": "₦" },
     "USD_KES": { "mid": 129.50, "source": "CoinGecko", "symbol": "KSh" },
     "GBP_NGN": { "mid": 1930.00, "source": "CoinGecko", "symbol": "₦" },
-    "USD_ARS": { "mid": 1495.00, "source": "CoinGecko (crypto-market)", "symbol": "$" }
+    "USD_ARS": { "mid": 1495.00, "source": "CoinGecko (crypto-market)", "symbol": "$" },
+    "USD_MXN": { "mid": 18.60, "source": "CoinGecko", "symbol": "$" },
+    "USD_INR": { "mid": 86.20, "source": "CoinGecko", "symbol": "₹" },
+    "USD_PHP": { "mid": 58.10, "source": "CoinGecko", "symbol": "₱" },
+    "USD_BRL": { "mid": 5.42, "source": "CoinGecko", "symbol": "R$" },
+    "USD_TRY": { "mid": 40.30, "source": "CoinGecko (crypto-market)", "symbol": "₺" },
+    "GBP_INR": { "mid": 108.50, "source": "CoinGecko", "symbol": "₹" },
+    "CAD_INR": { "mid": 62.10, "source": "CoinGecko", "symbol": "₹" }
   },
   "fx_benchmarks": {
     "NGN": { "official": 1365, "parallel": 1528, "note": "CoinGecko crypto-market rate (₦1,528) sits ~11.9% above the official CBN window (₦1,365) — the parallel premium stablecoin routes actually settle at." },
@@ -81,6 +88,99 @@
         { "name": "Western Union", "badge": "wallet", "subtitle": "Debit card in · bank deposit out", "send_method": "debit_card", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~15 min", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 1.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.63, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.40, "range_high": 2.00, "breakdown_note": "Low fee but FX at the official rate — effective cost ~12% at the blue-dollar benchmark." },
         { "name": "Citi Global Transfer", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "3–5 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 30.00, "fx_spread_pct": 5.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 33.00, "range_high": 38.00, "breakdown_note": "Settled at the official rate; recipient loses ~10.7% vs the blue-dollar market on top of the fee." }
       ]
+    },
+    {
+      "id": "us-mx",
+      "sender": "US", "sender_name": "United States", "sender_currency": "USD", "sender_flag": "🇺🇸",
+      "recipient": "MX", "recipient_name": "Mexico", "recipient_currency": "MXN", "recipient_flag": "🇲🇽",
+      "fx_pair": "USD_MXN",
+      "context": "The largest single corridor (~$65B/yr). Inflation is low, so the story here is fee, not hedging — but stablecoin → SPEI off-ramps (Bitso) still undercut card-funded remittance.",
+      "methods": [
+        { "name": "USDC", "badge": "crypto", "subtitle": "Base network · Bitso off-ramp to SPEI", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.30, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.25, "range_high": 0.45 },
+        { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · Bitso off-ramp to SPEI", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.35, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.45, "range_high": 1.05 },
+        { "name": "Félix", "badge": "wallet", "subtitle": "Debit card in · SPEI deposit (crypto-settled)", "send_method": "debit_card", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~5 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.50, "send_fee_flat_usd": 0.00, "fx_spread_pct": 1.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.30, "range_high": 1.80 },
+        { "name": "Wise", "badge": "wallet", "subtitle": "Bank/ACH in · SPEI deposit", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "same_day", "speed_detail": "hours", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.50, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.60, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 0.95, "range_high": 1.30 },
+        { "name": "Bank of America wire", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "1–3 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 45.00, "fx_spread_pct": 3.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 70.00, "range_high": 80.00, "breakdown_note": "DCI baseline: $75 on a $1,000 transfer. Flat $45 fee + ~3% FX spread." }
+      ]
+    },
+    {
+      "id": "us-in",
+      "sender": "US", "sender_name": "United States", "sender_currency": "USD", "sender_flag": "🇺🇸",
+      "recipient": "IN", "recipient_name": "India", "recipient_currency": "INR", "recipient_flag": "🇮🇳",
+      "fx_pair": "USD_INR",
+      "context": "The world's largest recipient (~$125B/yr). A competitive corridor with tight FX — but stablecoin → UPI still wins on speed and beats card-funded rails on cost.",
+      "methods": [
+        { "name": "USDC", "badge": "crypto", "subtitle": "Base network · off-ramp to UPI", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.30, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.25, "range_high": 0.45 },
+        { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · off-ramp to UPI", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.35, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.45, "range_high": 1.05 },
+        { "name": "Wise", "badge": "wallet", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "same_day", "speed_detail": "hours", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.40, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.50, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 0.80, "range_high": 1.10 },
+        { "name": "Remitly", "badge": "wallet", "subtitle": "Debit card in · bank deposit out", "send_method": "debit_card", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~10 min", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.99, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.50, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.20, "range_high": 1.80 },
+        { "name": "Bank wire (SWIFT)", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "2–4 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 25.00, "fx_spread_pct": 2.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 44.00, "range_high": 48.00, "breakdown_note": "Flat correspondent-bank fee." }
+      ]
+    },
+    {
+      "id": "us-ph",
+      "sender": "US", "sender_name": "United States", "sender_currency": "USD", "sender_flag": "🇺🇸",
+      "recipient": "PH", "recipient_name": "Philippines", "recipient_currency": "PHP", "recipient_flag": "🇵🇭",
+      "fx_pair": "USD_PHP",
+      "context": "GCash / mobile-wallet last mile dominates receive. DCI's cheapest here is Wells Fargo ExpressSend (~1.9%); stablecoin → GCash undercuts it.",
+      "methods": [
+        { "name": "USDC", "badge": "crypto", "subtitle": "Base network · off-ramp to GCash", "send_method": "crypto", "receive_method": "mobile_wallet", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.35, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.30, "range_high": 0.55 },
+        { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · off-ramp to GCash", "send_method": "crypto", "receive_method": "mobile_wallet", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.40, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.50, "range_high": 1.10 },
+        { "name": "Remitly", "badge": "wallet", "subtitle": "Debit card in · GCash out", "send_method": "debit_card", "receive_method": "mobile_wallet", "speed_tier": "instant", "speed_detail": "~5 min", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 1.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 1.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.70, "range_high": 2.30 },
+        { "name": "Wells Fargo ExpressSend", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "1–2 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.93, "send_fee_flat_usd": 0.00, "fx_spread_pct": 1.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.80, "range_high": 2.20, "breakdown_note": "DCI baseline: ~$19.3 on a $1,000 transfer (1.93%)." }
+      ]
+    },
+    {
+      "id": "us-br",
+      "sender": "US", "sender_name": "United States", "sender_currency": "USD", "sender_flag": "🇺🇸",
+      "recipient": "BR", "recipient_name": "Brazil", "recipient_currency": "BRL", "recipient_flag": "🇧🇷",
+      "fx_pair": "USD_BRL",
+      "context": "PIX instant rails + Bitso off-ramp make Brazil one of the most efficient LatAm corridors. DCI's cheapest bank here is BofA at ~1.18% FX.",
+      "methods": [
+        { "name": "USDC", "badge": "crypto", "subtitle": "Base network · Bitso off-ramp to PIX", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.30, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.25, "range_high": 0.45 },
+        { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · Bitso off-ramp to PIX", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.35, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.45, "range_high": 1.05 },
+        { "name": "Wise", "badge": "wallet", "subtitle": "Bank/ACH in · PIX deposit", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "same_day", "speed_detail": "hours", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.50, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.60, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 0.95, "range_high": 1.30 },
+        { "name": "Bank of America", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "1–3 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 1.18, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.10, "range_high": 1.30, "breakdown_note": "DCI baseline: ~$11.8 on a $1,000 transfer (1.18% FX)." }
+      ]
+    },
+    {
+      "id": "us-tr",
+      "sender": "US", "sender_name": "United States", "sender_currency": "USD", "sender_flag": "🇺🇸",
+      "recipient": "TR", "recipient_name": "Turkey", "recipient_currency": "TRY", "recipient_flag": "🇹🇷",
+      "fx_pair": "USD_TRY",
+      "context": "Lira inflation turns the stablecoin into a savings vehicle, not just a rail — recipients hold USDT (via Paribu / BtcTurk) and convert on spend. DCI has no Turkey-specific coverage.",
+      "methods": [
+        { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · hold or off-ramp via BtcTurk", "send_method": "crypto", "receive_method": "crypto", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.40, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.50, "range_high": 1.10 },
+        { "name": "USDC", "badge": "crypto", "subtitle": "Base network · hold or off-ramp via Paribu", "send_method": "crypto", "receive_method": "crypto", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.35, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.30, "range_high": 0.55 },
+        { "name": "Wise", "badge": "wallet", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "same_day", "speed_detail": "hours", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.60, "send_fee_flat_usd": 0.00, "fx_spread_pct": 1.50, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.90, "range_high": 2.40 },
+        { "name": "Bank wire (SWIFT)", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "2–4 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 25.00, "fx_spread_pct": 3.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 52.00, "range_high": 60.00, "breakdown_note": "Flat correspondent-bank fee + FX." }
+      ]
+    },
+    {
+      "id": "uk-in",
+      "sender": "GB", "sender_name": "United Kingdom", "sender_currency": "GBP", "sender_flag": "🇬🇧",
+      "recipient": "IN", "recipient_name": "India", "recipient_currency": "INR", "recipient_flag": "🇮🇳",
+      "fx_pair": "GBP_INR",
+      "context": "UK→India is a top diaspora corridor DCI does not cover (US-only origination). Wise and stablecoin → UPI dominate.",
+      "methods": [
+        { "name": "USDC", "badge": "crypto", "subtitle": "Base network · off-ramp to UPI", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.35, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.28, "range_high": 0.50 },
+        { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · off-ramp to UPI", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.30, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.45, "range_high": 1.05 },
+        { "name": "Wise", "badge": "wallet", "subtitle": "Faster Payments in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "same_day", "speed_detail": "hours", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.50, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.55, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 0.90, "range_high": 1.20 },
+        { "name": "Bank wire (SWIFT)", "badge": "bank", "subtitle": "Bank in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "2–4 days", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 20.00, "fx_spread_pct": 2.50, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 44.00, "range_high": 50.00, "breakdown_note": "Flat correspondent-bank fee." }
+      ]
+    },
+    {
+      "id": "ca-in",
+      "sender": "CA", "sender_name": "Canada", "sender_currency": "CAD", "sender_flag": "🇨🇦",
+      "recipient": "IN", "recipient_name": "India", "recipient_currency": "INR", "recipient_flag": "🇮🇳",
+      "fx_pair": "CAD_INR",
+      "context": "Canada→India is another large diaspora corridor outside DCI's US-only scope.",
+      "methods": [
+        { "name": "USDC", "badge": "crypto", "subtitle": "Base network · off-ramp to UPI", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.35, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.28, "range_high": 0.50 },
+        { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · off-ramp to UPI", "send_method": "crypto", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.35, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.45, "range_high": 1.05 },
+        { "name": "Remitly", "badge": "wallet", "subtitle": "Debit card in · bank deposit out", "send_method": "debit_card", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~10 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.99, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.80, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.50, "range_high": 2.10 },
+        { "name": "Bank wire (SWIFT)", "badge": "bank", "subtitle": "Bank in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "2–4 days", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 20.00, "fx_spread_pct": 2.50, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 44.00, "range_high": 50.00, "breakdown_note": "Flat correspondent-bank fee." }
+      ]
     }
   ],
   "dci": {
@@ -88,13 +188,28 @@
     "url": "https://mit-dci.github.io/payments-dashboard/",
     "as_of": "Aug 2026",
     "corridors": [
-      { "code": "US-MX", "label": "US → Mexico", "in_extension": false },
+      { "code": "US-MX", "label": "US → Mexico", "in_extension": true },
       { "code": "US-NG", "label": "US → Nigeria", "in_extension": true },
-      { "code": "US-IN", "label": "US → India", "in_extension": false },
-      { "code": "US-PH", "label": "US → Philippines", "in_extension": false },
+      { "code": "US-IN", "label": "US → India", "in_extension": true },
+      { "code": "US-PH", "label": "US → Philippines", "in_extension": true },
       { "code": "US-ID", "label": "US → Indonesia", "in_extension": false },
-      { "code": "US-BR", "label": "US → Brazil", "in_extension": false },
-      { "code": "US-TR", "label": "US → Turkey", "in_extension": false }
+      { "code": "US-BR", "label": "US → Brazil", "in_extension": true },
+      { "code": "US-TR", "label": "US → Turkey", "in_extension": true },
+      { "code": "US-GT", "label": "US → Guatemala", "in_extension": false },
+      { "code": "US-DO", "label": "US → Dominican Rep.", "in_extension": false },
+      { "code": "US-AR", "label": "US → Argentina", "in_extension": true }
+    ],
+    "corridor_costs": [
+      { "code": "US-BR", "dci_pct": 1.18, "dci_label": "Bank of America wire" },
+      { "code": "US-PH", "dci_pct": 1.93, "dci_label": "Wells Fargo ExpressSend" },
+      { "code": "US-DO", "dci_pct": 4.0, "dci_label": "Wells Fargo wire" },
+      { "code": "US-MX", "dci_pct": 7.5, "dci_label": "Bank of America wire" },
+      { "code": "US-NG", "dci_pct": 7.5, "dci_label": "Wells Fargo wire" },
+      { "code": "US-ID", "dci_pct": 8.0, "dci_label": "Wells Fargo wire" },
+      { "code": "US-AR", "dci_pct": 9.5, "dci_label": "Wells Fargo wire" },
+      { "code": "US-IN", "dci_pct": null, "dci_label": "generic wire (no India-specific rail)" },
+      { "code": "US-TR", "dci_pct": null, "dci_label": "generic wire (no Turkey-specific rail)" },
+      { "code": "US-GT", "dci_pct": 0.0, "dci_label": "crypto-only — USDC network $0.02" }
     ],
     "shared_corridor": {
       "id": "us-ng",
@@ -111,7 +226,19 @@
       "Stablecoins are modeled network-only (USDC: 0% FX loss, ~$0.02 network), so crypto reads as near-free and Nigeria's best fee shows ~0% — the real NGN off-ramp spread is omitted.",
       "No mobile-money last mile (OPay / PalmPay / M-Pesa) and no P2P (Binance P2P) — the channels that set the real street rate in these corridors.",
       "FX uses a generic benchmark; the crypto / parallel rate (~₦1,528) runs ~11.9% above the official window (~₦1,365), which changes the true best-rate ranking.",
-      "All corridors are US-originating — no UK→Nigeria, no US→Kenya (M-Pesa), no intra-EM routes where stablecoins have their strongest use case."
+      "All DCI corridors are US-originating — no UK→ or Canada→ routes (this extension adds UK→Nigeria, UK→India, Canada→India) and no intra-EM routes where stablecoins have their strongest use case."
     ]
+  },
+  "study": {
+    "title": "Dollar-Stable Wallets · Hedging Volatility for EM Remittance Households",
+    "author": "Bernard O'bien / Cambio",
+    "period": "Independent study · market data H1 2025",
+    "thesis": "Stablecoins move remittances from a transmission model (move fiat A→B) to a value-retention model: the recipient holds a USD-pegged asset and converts to local currency only at the moment of consumption, hedging local inflation.",
+    "why_points": [
+      { "country": "Nigeria", "note": "The Naira has lost 70%+ vs USD; converting on receipt is an 'inflation tax'. Stablecoins offer a digital alternative to the parallel market at the true market rate." },
+      { "country": "Argentina", "note": "Chronic inflation and capital controls make holding ARS punitive; the blue-dollar gap means a USD-pegged wallet materially beats bank settlement at the official rate." },
+      { "country": "Turkey", "note": "Lira inflation turns the stablecoin into a savings vehicle — recipients hold USDT via Paribu / BtcTurk and convert on spend, not on receipt." }
+    ],
+    "corridor_note": "In the Nigeria corridor the 50+ demographic sends the highest amounts (~$226) on non-discretionary, high-frequency schedules — flows that reward low fixed-cost stablecoin rails over percentage-fee remittance."
   }
 }

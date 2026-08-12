@@ -251,9 +251,38 @@
   .flags li:last-child { border-bottom: none; }
   .flags li::before { content: "!"; position: absolute; left: 0; top: 9px; width: 15px; height: 15px; border-radius: 50%; background: var(--red-bg); color: var(--red); font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 
+  /* Cost spectrum */
+  .spectrum { background: var(--card); border: 0.5px solid var(--line); border-top: none; padding: 14px 20px 10px; }
+  .spectrum:empty { display: none; }
+  .spectrum-head { font-size: 12px; font-weight: 700; color: var(--ink); display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .spectrum-sub { font-size: 11px; font-weight: 400; color: var(--ink-3); }
+  .spectrum-svg { width: 100%; height: 92px; display: block; margin-top: 2px; overflow: visible; }
+  .spec-lbl { font: 700 15px var(--font-sans); fill: var(--ink); }
+  .spec-lbl-pct { font: 700 13px var(--font-mono); fill: var(--ink-2); }
+  .spec-axis { font: 700 12px var(--font-sans); fill: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+  .spectrum-legend { display: flex; gap: 18px; font-size: 11px; color: var(--ink-2); margin-top: 2px; }
+  .spectrum-legend .sw { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .sw-red { background: var(--red); } .sw-ink { background: var(--ink-3); opacity: 0.55; }
+
+  /* study band + why panel + cost table */
+  .study-band { background: var(--ink); color: #fff; border-radius: 8px; padding: 16px 18px; margin-bottom: 22px; }
+  .study-title { font-size: 13px; font-weight: 800; letter-spacing: 0.02em; }
+  .study-thesis { font-size: 13px; color: #d9d8d3; margin-top: 6px; line-height: 1.55; }
+  .study-meta { font-size: 11px; color: #9a988f; margin-top: 8px; }
+  .why-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .why-item { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; border: 0.5px solid var(--line); border-left: 3px solid var(--red); border-radius: 6px; padding: 10px 12px; }
+  .why-c { display: block; font-weight: 800; color: var(--ink); font-size: 12px; margin-bottom: 4px; }
+  .dci-sec-sub { font-size: 12px; color: var(--ink-2); margin: -4px 0 12px; max-width: 780px; line-height: 1.5; }
+  .cov .r { text-align: right; }
+  .cov.cost td.r { font-variant-numeric: tabular-nums; }
+  .cov .muted { color: var(--ink-3); font-size: 11px; font-weight: 400; }
+  .cov .delta { color: var(--red); font-weight: 700; font-size: 11px; white-space: nowrap; }
+  .study-foot { font-size: 12px; color: var(--ink-3); font-style: italic; margin-top: 22px; padding-top: 14px; border-top: 0.5px solid var(--line); line-height: 1.55; }
+
   @media (max-width: 900px) {
     .controlbar { grid-template-columns: 1fr; }
     .cmp { grid-template-columns: 1fr; }
+    .why-wrap { grid-template-columns: 1fr; }
     .cmp-col:first-child { border-right: none; border-bottom: 0.5px solid var(--line); }
     .ctl { border-right: none; border-bottom: 0.5px solid var(--line); }
     .cardgrid { grid-template-columns: repeat(2, 1fr); }
@@ -323,6 +352,8 @@
     <div class="hero-main" id="hero-main"></div>
     <div class="hero-sub" id="hero-sub"></div>
   </div>
+
+  <div id="spectrum" class="spectrum"></div>
 
   <div class="filterbar">
     <div class="fgroup">

@@ -4,6 +4,15 @@ An open extension of the [MIT DCI Money Map](https://mit-dci.github.io/payments-
 
 **Live prototype:** https://bernardobien.github.io/money-map-em/
 
+## v0.5 changelog
+
+Deepened the extension and the DCI comparison, grounded in an independent study.
+
+- **Cost spectrum** — a money-map graph (less cluttered than DCI's): each method is a dot positioned by total cost, coloured by the thesis — red = added by this extension (missing from DCI), ink = on DCI. The cheap end is red; bank wires sit far right.
+- **Corridors expanded** — senders **US / UK / Canada**; receivers across the DCI set (Mexico, India, Philippines, Brazil, Turkey added on top of Nigeria, Kenya, Argentina), plus UK→India and Canada→India.
+- **vs-DCI deepened to all 10 DCI corridors** using DCI's own extracted numbers: a corridor-by-corridor "cheapest rail" table (Mexico & Nigeria ~24× cheaper, Argentina ~19×, Philippines ~5×, Brazil ~4×), a corrected coverage matrix (DCI does cover Argentina, Guatemala, Dominican Rep.), and Guatemala flagged as DCI's one crypto-only corridor.
+- **Study woven in for credence** — the *Dollar-Stable Wallets · Hedging Volatility for EM Remittance Households* thesis (value-retention vs transmission) and per-country context (Nigeria −70% Naira, Argentina blue-dollar, Turkey Lira-as-savings) drawn from the independent study.
+
 ## v0.4 changelog
 
 Added a **"vs DCI"** tab that positions the tool explicitly as an extension of the MIT DCI Money Map, built from DCI's own live data (extracted Aug 2026):
