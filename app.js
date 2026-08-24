@@ -436,6 +436,7 @@
     const addItems = added.map(m => `<div class="cmp-item"><span class="nm">${m.name}<span class="cat">${m.subtitle}</span></span><span class="val">${total100(m).toFixed(2)}%</span></div>`).join('');
 
     const flags = dci.gaps.map(g => `<li>${g}</li>`).join('');
+    const watch = (study.watch || []).map(w => `<li><span class="w-date">${w.date}</span><span class="w-label">${w.label}</span> ${w.note}</li>`).join('');
 
     document.getElementById('dci-view').innerHTML =
       `<div class="dci">` +
@@ -447,6 +448,7 @@
         `<div class="dci-sec"><div class="dci-sec-h">Cheapest rail, corridor by corridor</div><div class="dci-sec-sub">DCI's corridor-specific bank baseline vs the cheapest method this extension surfaces (total cost on $100). The stablecoin rail DCI under-models is consistently cheaper.</div><table class="cov cost"><thead><tr><th>Corridor</th><th class="r">DCI baseline</th><th class="r">Extension best</th><th class="r"></th></tr></thead><tbody>${costRows}</tbody></table></div>` +
         `<div class="dci-sec"><div class="dci-sec-h">US → Nigeria · the deepest shared corridor</div><div class="cmp"><div class="cmp-col"><div class="cmp-h">On the DCI Money Map</div><div class="cmp-sub">Nigeria-specific: 3 bank wires + a network-only stablecoin</div>${dciItems}</div><div class="cmp-col"><div class="cmp-h">Added by this extension</div><div class="cmp-sub">${added.length} EM-native methods missing from DCI · total cost on $100</div>${addItems}</div></div></div>` +
         `<div class="dci-sec"><div class="dci-sec-h">Where the DCI numbers mislead</div><ul class="flags">${flags}</ul></div>` +
+        `<div class="dci-sec"><div class="dci-sec-h">Regulatory &amp; data watch</div><ul class="watch">${watch}</ul></div>` +
         `<div class="study-foot">${study.corridor_note}</div>` +
       `</div>`;
   }

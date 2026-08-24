@@ -1,23 +1,23 @@
 {
   "meta": {
-    "version": "0.5.1",
-    "last_updated": "2026-08-12",
-    "rate_timestamp": "Aug 12 2026 · 13:00 EST",
+    "version": "0.6.0",
+    "last_updated": "2026-08-24",
+    "rate_timestamp": "Aug 24 2026 · 16:00 EST",
     "fx_source": "CoinGecko (mid-market) + provider quotes",
     "notes": "v0.3 full redesign following external design feedback: primary user flow (route -> amount -> currency -> results), per-method fee breakdown, list and card views, filter panel. US-Nigeria decomposed to match the reviewer's wireframe. Rates are Aug 10-12 2026 approximations; estimates shown for the entered amount. Not live quotes. FX spread / send / receive fees scale with amount; network and flat wire fees do not.",
     "maintainer": "Bernard O'bien / Cambio",
     "contact": "obien@mit.edu"
   },
   "fx_rates": {
-    "USD_NGN": { "mid": 1528.40, "source": "CoinGecko", "symbol": "₦" },
+    "USD_NGN": { "mid": 1410.00, "source": "CoinGecko / Aboki (Aug 24)", "symbol": "₦" },
     "USD_KES": { "mid": 129.50, "source": "CoinGecko", "symbol": "KSh" },
-    "GBP_NGN": { "mid": 1930.00, "source": "CoinGecko", "symbol": "₦" },
-    "USD_ARS": { "mid": 1495.00, "source": "CoinGecko (crypto-market)", "symbol": "$" },
+    "GBP_NGN": { "mid": 1780.00, "source": "CoinGecko / Aboki (Aug 24)", "symbol": "₦" },
+    "USD_ARS": { "mid": 1500.00, "source": "CoinGecko (crypto-market, Aug 24)", "symbol": "$" },
     "USD_MXN": { "mid": 18.60, "source": "CoinGecko", "symbol": "$" },
     "USD_INR": { "mid": 86.20, "source": "CoinGecko", "symbol": "₹" },
     "USD_PHP": { "mid": 58.10, "source": "CoinGecko", "symbol": "₱" },
     "USD_BRL": { "mid": 5.42, "source": "CoinGecko", "symbol": "R$" },
-    "USD_TRY": { "mid": 40.30, "source": "CoinGecko (crypto-market)", "symbol": "₺" },
+    "USD_TRY": { "mid": 48.07, "source": "CoinGecko (Aug 24)", "symbol": "₺" },
     "GBP_INR": { "mid": 108.50, "source": "CoinGecko", "symbol": "₹" },
     "CAD_INR": { "mid": 62.10, "source": "CoinGecko", "symbol": "₹" },
     "USD_IDR": { "mid": 16350.00, "source": "CoinGecko", "symbol": "Rp" },
@@ -25,8 +25,8 @@
     "USD_DOP": { "mid": 61.50, "source": "CoinGecko", "symbol": "RD$" }
   },
   "fx_benchmarks": {
-    "NGN": { "official": 1365, "parallel": 1528, "note": "CoinGecko crypto-market rate (₦1,528) sits ~11.9% above the official CBN window (₦1,365) — the parallel premium stablecoin routes actually settle at." },
-    "ARS": { "official": 1350, "parallel": 1495, "note": "Blue-dollar / crypto rate (~$1,495) is ~10.7% above the official rate ($1,350); bank routes settle at official and lose the gap." }
+    "NGN": { "official": 1345, "parallel": 1410, "note": "Parallel / crypto rate (~₦1,410) sits ~4.8% above the official NFEM window (~₦1,345) as of Aug 24 — the naira has firmed and the premium has narrowed from ~12% earlier in the month." },
+    "ARS": { "official": 1477, "parallel": 1500, "note": "As of Aug 24 the blue-dollar gap has largely collapsed (~1.5%): blue ~$1,500 vs official ~$1,477. The stablecoin case in Argentina is now inflation / capital-control hedging, not FX arbitrage." }
   },
   "corridors": [
     {
@@ -88,8 +88,8 @@
         { "name": "USDT", "badge": "crypto", "subtitle": "Tron network · crypto in, ARS out", "send_method": "crypto", "receive_method": "crypto", "speed_tier": "instant", "speed_detail": "~1 min", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.45, "network_fee_usd": 0.24, "receive_fee_pct": 0.00 }, "range_low": 0.50, "range_high": 1.10, "breakdown_note": "Settles at the blue-dollar / crypto rate, not the official rate." },
         { "name": "USDC", "badge": "crypto", "subtitle": "Base network · crypto in, ARS out", "send_method": "crypto", "receive_method": "crypto", "speed_tier": "instant", "speed_detail": "~30 sec", "on_money_map": false, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.50, "network_fee_usd": 0.01, "receive_fee_pct": 0.00 }, "range_low": 0.40, "range_high": 0.75 },
         { "name": "Wise", "badge": "wallet", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "same_day", "speed_detail": "hours", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 1.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 1.75, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 2.40, "range_high": 3.00, "breakdown_note": "Settles at the official rate." },
-        { "name": "Western Union", "badge": "wallet", "subtitle": "Debit card in · bank deposit out", "send_method": "debit_card", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~15 min", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 1.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.63, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.40, "range_high": 2.00, "breakdown_note": "Low fee but FX at the official rate — effective cost ~12% at the blue-dollar benchmark." },
-        { "name": "Citi Global Transfer", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "3–5 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 30.00, "fx_spread_pct": 5.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 33.00, "range_high": 38.00, "breakdown_note": "Settled at the official rate; recipient loses ~10.7% vs the blue-dollar market on top of the fee." }
+        { "name": "Western Union", "badge": "wallet", "subtitle": "Debit card in · bank deposit out", "send_method": "debit_card", "receive_method": "bank_deposit", "speed_tier": "instant", "speed_detail": "~15 min", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 1.00, "send_fee_flat_usd": 0.00, "fx_spread_pct": 0.63, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 1.40, "range_high": 2.00, "breakdown_note": "Low fee, FX at the official rate. With the blue-dollar gap now ~1.5% (Aug 24), the old ~12% penalty has largely gone — the case for crypto here is inflation hedging, not the gap." },
+        { "name": "Citi Global Transfer", "badge": "bank", "subtitle": "Bank/ACH in · bank deposit out", "send_method": "bank_ach", "receive_method": "bank_deposit", "speed_tier": "lt_3_days", "speed_detail": "3–5 days", "on_money_map": true, "fee_breakdown": { "send_fee_pct": 0.00, "send_fee_flat_usd": 30.00, "fx_spread_pct": 5.00, "network_fee_usd": 0.00, "receive_fee_pct": 0.00 }, "range_low": 33.00, "range_high": 38.00, "breakdown_note": "Settled at the official rate. The blue-dollar gap has collapsed to ~1.5% (Aug 24), so the fee — not the FX — is now the main cost." }
       ]
     },
     {
@@ -230,7 +230,7 @@
   "dci": {
     "name": "MIT DCI Money Map",
     "url": "https://mit-dci.github.io/payments-dashboard/",
-    "as_of": "Aug 2026",
+    "as_of": "refreshed Aug 24 2026",
     "corridors": [
       { "code": "US-MX", "label": "US → Mexico", "in_extension": true },
       { "code": "US-NG", "label": "US → Nigeria", "in_extension": true },
@@ -269,7 +269,7 @@
       "Nigeria-specific coverage is 3 bank wires plus generic global methods — no EM-native providers (LemFi, Sendwave, NALA, Grey, ChipperCash).",
       "Stablecoins are modeled network-only (USDC: 0% FX loss, ~$0.02 network), so crypto reads as near-free and Nigeria's best fee shows ~0% — the real NGN off-ramp spread is omitted.",
       "No mobile-money last mile (OPay / PalmPay / M-Pesa) and no P2P (Binance P2P) — the channels that set the real street rate in these corridors.",
-      "FX uses a generic benchmark; the crypto / parallel rate (~₦1,528) runs ~11.9% above the official window (~₦1,365), which changes the true best-rate ranking.",
+      "FX uses a generic benchmark; the parallel / crypto rate (~₦1,410 on Aug 24) runs ~4.8% above the official window (~₦1,345), which changes the true best-rate ranking.",
       "All DCI corridors are US-originating — no UK→ or Canada→ routes (this extension adds UK→Nigeria, UK→India, Canada→India) and no intra-EM routes where stablecoins have their strongest use case."
     ]
   },
@@ -280,9 +280,14 @@
     "thesis": "Stablecoins move remittances from a transmission model (move fiat A→B) to a value-retention model: the recipient holds a USD-pegged asset and converts to local currency only at the moment of consumption, hedging local inflation.",
     "why_points": [
       { "country": "Nigeria", "note": "The Naira has lost 70%+ vs USD; converting on receipt is an 'inflation tax'. Stablecoins offer a digital alternative to the parallel market at the true market rate." },
-      { "country": "Argentina", "note": "Chronic inflation and capital controls make holding ARS punitive; the blue-dollar gap means a USD-pegged wallet materially beats bank settlement at the official rate." },
+      { "country": "Argentina", "note": "Chronic inflation and capital controls make holding ARS punitive. The blue-dollar gap has largely closed in 2026 (~1.5%), so the value now comes from holding a USD-pegged asset through inflation, not from an FX-rate arbitrage." },
       { "country": "Turkey", "note": "Lira inflation turns the stablecoin into a savings vehicle — recipients hold USDT via Paribu / BtcTurk and convert on spend, not on receipt." }
     ],
-    "corridor_note": "In the Nigeria corridor the 50+ demographic sends the highest amounts (~$226) on non-discretionary, high-frequency schedules — flows that reward low fixed-cost stablecoin rails over percentage-fee remittance."
+    "corridor_note": "In the Nigeria corridor the 50+ demographic sends the highest amounts (~$226) on non-discretionary, high-frequency schedules — flows that reward low fixed-cost stablecoin rails over percentage-fee remittance.",
+    "watch": [
+      { "date": "Aug 17 2026", "label": "GENIUS Act", "note": "The US Treasury opened proposed rulemaking on cross-border stablecoin activity; the OCC targets final rules by November and the Act takes effect January 2027. From July 2028, foreign-issued stablecoins — and the off-ramps built on them (Yellow Card, Bitso) — must have reciprocal-compliance capability. Compliance, not rails, becomes the gating factor — the study's core prediction." },
+      { "date": "Aug 24 2026", "label": "DCI refresh", "note": "The DCI Money Map refreshed its quotes: Mexico now lists 24 methods (was 21) and its cheapest is Remitly $1.99 (was Western Union). Its corridor-specific bank baselines — the numbers this comparison uses — are unchanged." },
+      { "date": "Aug 24 2026", "label": "FX re-sweep", "note": "Naira firmed (parallel ₦1,528 → ~₦1,410, premium ~12% → ~4.8%); Argentina's blue-dollar gap collapsed (~10.7% → ~1.5%); Turkish lira weakened ~19% (₺40.3 → ₺48.1). Rates and the Argentina narrative updated accordingly." }
+    ]
   }
 }

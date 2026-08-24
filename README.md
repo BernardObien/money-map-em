@@ -4,6 +4,14 @@ An open extension of the [MIT DCI Money Map](https://mit-dci.github.io/payments-
 
 **Live prototype:** https://bernardobien.github.io/money-map-em/
 
+## v0.6 changelog
+
+Refreshed to reflect what has moved since the Aug 12 snapshot (now dated Aug 24 2026).
+
+- **FX re-sweep** — Naira firmed (parallel ₦1,528 → ~₦1,410; premium ~12% → ~4.8%); **Argentina's blue-dollar gap collapsed (~10.7% → ~1.5%)**, so the Argentina case is reframed around inflation / value-retention rather than FX arbitrage; **Turkish lira weakened ~19%** (₺40.3 → ₺48.1), reinforcing the savings-hedge thesis. Stale ~10.7%/~12% notes on the Argentina methods were corrected.
+- **DCI re-synced** — re-extracted the live DCI bundle; its corridor-specific bank baselines (the comparison's numbers) are unchanged, but DCI's front end now lists 24 methods on Mexico (was 21) with Remitly cheapest (was Western Union). Timestamps updated.
+- **Regulatory & data watch** — new dated section in the vs-DCI view: the GENIUS Act NPRM (Aug 17), the DCI refresh, and this FX re-sweep.
+
 ## v0.5 changelog
 
 Deepened the extension and the DCI comparison, grounded in an independent study.
