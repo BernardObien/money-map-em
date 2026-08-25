@@ -4,6 +4,13 @@ An open extension of the [MIT DCI Money Map](https://mit-dci.github.io/payments-
 
 **Live prototype:** https://bernardobien.github.io/money-map-em/
 
+## v0.7 changelog
+
+Added the **Gas fees** tab — building in the DCI dashboard's gas-fees view, tied to this project's thesis.
+
+- Typical network (gas) fee per stablecoin transfer across chains — Solana / Stellar (<$0.01), Base ($0.01), Polygon, Arbitrum, Tron ($0.24), Ethereum L1 ($8) — with a magnitude bar and the fee as a % of a $100 vs $1,000 transfer.
+- Framed for remittances: gas is a **flat** cost, so it decides whether crypto is viable for small transfers (Ethereum 8% on $100 → 0.8% on $1,000). It's the same **Network fee** line shown in every stablecoin breakdown on the Corridors tab.
+
 ## v0.6 changelog
 
 Refreshed to reflect what has moved since the Aug 12 snapshot (now dated Aug 24 2026).

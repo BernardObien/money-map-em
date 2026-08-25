@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "0.6.0",
+    "version": "0.7.0",
     "last_updated": "2026-08-24",
     "rate_timestamp": "Aug 24 2026 · 16:00 EST",
     "fx_source": "CoinGecko (mid-market) + provider quotes",
@@ -288,6 +288,19 @@
       { "date": "Aug 17 2026", "label": "GENIUS Act", "note": "The US Treasury opened proposed rulemaking on cross-border stablecoin activity; the OCC targets final rules by November and the Act takes effect January 2027. From July 2028, foreign-issued stablecoins — and the off-ramps built on them (Yellow Card, Bitso) — must have reciprocal-compliance capability. Compliance, not rails, becomes the gating factor — the study's core prediction." },
       { "date": "Aug 24 2026", "label": "DCI refresh", "note": "The DCI Money Map refreshed its quotes: Mexico now lists 24 methods (was 21) and its cheapest is Remitly $1.99 (was Western Union). Its corridor-specific bank baselines — the numbers this comparison uses — are unchanged." },
       { "date": "Aug 24 2026", "label": "FX re-sweep", "note": "Naira firmed (parallel ₦1,528 → ~₦1,410, premium ~12% → ~4.8%); Argentina's blue-dollar gap collapsed (~10.7% → ~1.5%); Turkish lira weakened ~19% (₺40.3 → ₺48.1). Rates and the Argentina narrative updated accordingly." }
+    ]
+  },
+  "gas": {
+    "as_of": "Aug 25 2026",
+    "note": "Typical network (gas) fee for a single USDC/USDT transfer. A flat cost per transfer, independent of amount — this is the Network fee line in every stablecoin breakdown on the Corridors tab. Illustrative, not live.",
+    "chains": [
+      { "name": "Solana", "asset": "USDC", "fee_usd": 0.001, "speed": "~1 sec", "note": "Sub-cent — effectively free at any transfer size" },
+      { "name": "Stellar", "asset": "USDC", "fee_usd": 0.001, "speed": "~5 sec", "note": "Purpose-built for payments; negligible fee" },
+      { "name": "Base", "asset": "USDC", "fee_usd": 0.01, "speed": "~2 sec", "note": "The default low-cost L2 used across this map" },
+      { "name": "Polygon", "asset": "USDC", "fee_usd": 0.02, "speed": "~3 sec", "note": "Low-cost EVM sidechain" },
+      { "name": "Arbitrum", "asset": "USDC", "fee_usd": 0.03, "speed": "~1 sec", "note": "Low-cost EVM L2" },
+      { "name": "Tron", "asset": "USDT", "fee_usd": 0.24, "speed": "~1 min", "note": "The USDT-dominant rail in EM P2P — small but non-zero" },
+      { "name": "Ethereum L1", "asset": "USDC / USDT", "fee_usd": 8.00, "speed": "~2 min", "note": "Gas dominates — unusable for small remittances; only tolerable at large size" }
     ]
   }
 }

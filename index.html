@@ -277,6 +277,10 @@
   .cov.cost td.r { font-variant-numeric: tabular-nums; }
   .cov .muted { color: var(--ink-3); font-size: 11px; font-weight: 400; }
   .cov .delta { color: var(--red); font-weight: 700; font-size: 11px; white-space: nowrap; }
+  .cov.gas .gas-barcell { width: 26%; }
+  .gas-bar { display: inline-block; height: 8px; background: var(--red); border-radius: 2px; vertical-align: middle; opacity: 0.85; min-width: 2px; }
+  .chain-name { font-weight: 700; }
+  .gas-usd { font-variant-numeric: tabular-nums; font-weight: 700; }
   .watch { list-style: none; padding: 0; margin: 0; }
   .watch li { font-size: 13px; color: var(--ink-2); line-height: 1.55; padding: 10px 0; border-bottom: 0.5px solid var(--line); }
   .watch li:last-child { border-bottom: none; }
@@ -311,7 +315,7 @@
       <nav class="navtabs">
         <span class="navtab active" data-tab="corridors">Corridors</span>
         <span class="navtab" data-tab="dci">vs DCI</span>
-        <span class="navtab disabled">Gas fees</span>
+        <span class="navtab" data-tab="gas">Gas fees</span>
         <span class="navtab disabled">Stablecoin use</span>
       </nav>
     </div>
@@ -396,6 +400,8 @@
   </div><!-- /corridors-view -->
 
   <div id="dci-view" style="display:none;"></div>
+
+  <div id="gas-view" style="display:none;"></div>
 
   <footer id="footer"></footer>
 </div>

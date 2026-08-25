@@ -199,12 +199,14 @@
 
   // ---- dynamic render -----------------------------------------------------
   function renderAll() {
-    // tab switch: Corridors vs the "vs DCI" comparison
+    // tab switch: Corridors / vs DCI / Gas fees
     document.querySelectorAll('.navtab[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === state.tab));
-    const isDci = state.tab === 'dci';
-    document.getElementById('corridors-view').style.display = isDci ? 'none' : '';
-    document.getElementById('dci-view').style.display = isDci ? '' : 'none';
-    if (isDci) { renderDci(); return; }
+    const tab = state.tab;
+    document.getElementById('corridors-view').style.display = tab === 'corridors' ? '' : 'none';
+    document.getElementById('dci-view').style.display = tab === 'dci' ? '' : 'none';
+    document.getElementById('gas-view').style.display = tab === 'gas' ? '' : 'none';
+    if (tab === 'dci') { renderDci(); return; }
+    if (tab === 'gas') { renderGas(); return; }
 
     // active classes on controls
     document.querySelectorAll('.preset').forEach(b => b.classList.toggle('active', Number(b.dataset.v) === state.amount));
@@ -450,6 +452,40 @@
         `<div class="dci-sec"><div class="dci-sec-h">Where the DCI numbers mislead</div><ul class="flags">${flags}</ul></div>` +
         `<div class="dci-sec"><div class="dci-sec-h">Regulatory &amp; data watch</div><ul class="watch">${watch}</ul></div>` +
         `<div class="study-foot">${study.corridor_note}</div>` +
+      `</div>`;
+  }
+
+  // ---- "Gas fees" view ----------------------------------------------------
+  function renderGas() {
+    const g = data.gas;
+    const rows = [...g.chains].sort((a, b) => a.fee_usd - b.fee_usd);
+    const maxFee = Math.max(...rows.map(c => c.fee_usd));
+    const cheapest = rows[0];
+    const fmtUsd = f => f < 0.01 ? '$' + f.toFixed(3) : '$' + f.toFixed(2);
+    const fmtPct = v => v < 0.01 ? '<0.01%' : (v < 1 ? v.toFixed(2) : v.toFixed(1)) + '%';
+    const barW = f => Math.max(2, Math.sqrt(f / maxFee) * 100);
+    const trs = rows.map(c => {
+      const isCh = c === cheapest;
+      return `<tr>` +
+        `<td><span class="chain-name">${c.name}</span> <span class="muted">${c.asset}</span>${isCh ? ' <span class="pill-cheapest">Cheapest</span>' : ''}<div class="m-sub">${c.note || ''}</div></td>` +
+        `<td class="r"><span class="gas-usd">${fmtUsd(c.fee_usd)}</span></td>` +
+        `<td class="gas-barcell"><span class="gas-bar" style="width:${barW(c.fee_usd).toFixed(1)}%"></span></td>` +
+        `<td class="r muted">${c.speed}</td>` +
+        `<td class="r">${fmtPct(c.fee_usd)}</td>` +
+        `<td class="r">${fmtPct(c.fee_usd / 10)}</td>` +
+        `</tr>`;
+    }).join('');
+    document.getElementById('gas-view').innerHTML =
+      `<div class="dci">` +
+        `<h2>Gas fees — the flat cost of moving a stablecoin</h2>` +
+        `<p class="lede">Every stablecoin transfer pays a network (gas) fee to the blockchain — a <strong>flat cost per transfer, independent of amount</strong>. It is the one line in each method's breakdown that does not scale, which is why the chain decides whether crypto is viable for a $100 remittance. Typical single-transfer fees, ${g.as_of}.</p>` +
+        `<div class="dci-sec"><table class="cov gas"><thead><tr><th>Chain</th><th class="r">Network fee</th><th></th><th class="r">Speed</th><th class="r">on $100</th><th class="r">on $1,000</th></tr></thead><tbody>${trs}</tbody></table></div>` +
+        `<div class="dci-sec"><div class="dci-sec-h">Why it matters for remittances</div><ul class="flags">` +
+          `<li>Gas is flat, so it hurts small transfers most: $8 on Ethereum L1 is 8% of a $100 remittance but 0.08% of $10,000 — which is why the corridors here route small transfers over Base, Solana or Tron and never Ethereum L1.</li>` +
+          `<li>This is the <strong>Network fee</strong> line in every stablecoin breakdown on the Corridors tab — Base ~$0.01, Tron ~$0.24, Ethereum ~$8.</li>` +
+          `<li>Sub-cent chains (Solana, Stellar, Base) make the network fee effectively zero at any remittance size — the cost is then just the FX spread and the off-ramp.</li>` +
+        `</ul></div>` +
+        `<div class="study-foot">${g.note}</div>` +
       `</div>`;
   }
 
